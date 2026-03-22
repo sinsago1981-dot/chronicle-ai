@@ -848,7 +848,7 @@ export default function Game() {
                             >
                               <div className="flex items-start gap-2 w-full">
                                 <span className="text-primary/60 mt-0.5 shrink-0 font-mono text-xs">{idx + 1}.</span>
-                                <span className="text-sm">{choice}</span>
+                                <span className="text-sm min-w-0 flex-1 break-words whitespace-normal leading-snug">{choice}</span>
                               </div>
                               {threshold && (
                                 <div className="flex items-center gap-1.5 pl-4 mt-0.5">
@@ -899,9 +899,9 @@ export default function Game() {
                                   setSelectedSkillId(sc.skillId);
                                 }}
                               >
-                                <div className="flex items-center gap-2 w-full">
+                                <div className="flex items-start gap-2 w-full">
                                   <Zap className="w-3 h-3 text-violet-400/70 shrink-0 mt-0.5" />
-                                  <span className="text-sm text-foreground/90">{sc.choiceText}</span>
+                                  <span className="text-sm text-foreground/90 min-w-0 flex-1 break-words whitespace-normal leading-snug">{sc.choiceText}</span>
                                 </div>
                                 <div className="flex items-center gap-1.5 pl-5">
                                   <span className="text-[10px] font-bold text-violet-400/60 uppercase tracking-wider">
@@ -970,7 +970,7 @@ export default function Game() {
                                     </span>
                                     <Key className="w-3 h-3 text-amber-500/60 ml-auto" />
                                   </div>
-                                  <p className="text-sm text-foreground/80 pl-1">{kic.choiceText}</p>
+                                  <p className="text-sm text-foreground/80 pl-1 break-words whitespace-normal leading-snug">{kic.choiceText}</p>
                                 </div>
                               </Button>
                             );
