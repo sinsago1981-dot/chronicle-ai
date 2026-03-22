@@ -1934,6 +1934,10 @@ function playerDefRating(stats: Stats): number {
   return Math.floor((stats.strength + stats.will) / 5);
 }
 
+// d20 DCs: enemy defence/attack divided by 2, base 8
+function attackHitDC(enemyDef: number): number { return 8 + Math.floor(enemyDef / 2); }
+function blockDC(enemyAtk: number):    number { return 8 + Math.floor(enemyAtk / 2); }
+
 // ─── POST /:id/combat-action ──────────────────────────────────────────────────
 router.post("/:id/combat-action", async (req, res) => {
   const sessionId = parseInt(req.params.id);
@@ -2003,26 +2007,60 @@ router.post("/:id/combat-action", async (req, res) => {
 
     // ── Resolve player action ────────────────────────────────────────────────
     if (action === "attack") {
-      const roll6 = d6();
-      const crit20 = Math.floor(Math.random() * 20) + 1;
-      isCritical = crit20 >= 18;
-      isFumble   = crit20 <= 2;
-      let dmg = newStats.strength + roll6 - effEnemyDef;
-      if (isCritical) dmg = Math.round(dmg * 1.6);
-      if (isFumble)   dmg = Math.max(0, Math.round(dmg * 0.4));
-      playerDamage = Math.max(1, dmg);
+      const d20Roll  = rollD20();
+      const hitBonus = statModifier(newStats.strength);
+      const hitTotal = d20Roll + hitBonus;
+      const dc       = attackHitDC(effEnemyDef);
+      isCritical     = d20Roll === 20;
+      isFumble       = d20Roll === 1;
+
+      if (!isFumble && (isCritical || hitTotal >= dc)) {
+        const roll6 = d6();
+        let dmg = newStats.strength + roll6 - effEnemyDef;
+        if (isCritical) dmg = Math.round(dmg * 1.75);
+        playerDamage = Math.max(1, dmg);
+      }
+
+      const hitLabel = isFumble
+        ? (lang === "ko" ? "대실패!" : "Fumble!")
+        : isCritical
+          ? (lang === "ko" ? "치명타!" : "Critical hit!")
+          : hitTotal >= dc
+            ? (lang === "ko" ? "명중!" : "Hit!")
+            : (lang === "ko" ? "빗나감!" : "Miss!");
+
       combatLog.push(lang === "ko"
-        ? `⚔ ${isCritical ? "치명타! " : isFumble ? "실수... " : ""}적에게 ${playerDamage} 피해.`
-        : `⚔ ${isCritical ? "Critical hit! " : isFumble ? "Fumble... " : ""}Dealt ${playerDamage} damage.`);
+        ? `⚔ [d20: ${d20Roll}${hitBonus >= 0 ? "+" : ""}${hitBonus}=${hitTotal}] ${hitLabel}${playerDamage > 0 ? ` 적에게 ${playerDamage} 피해.` : ""}`
+        : `⚔ [d20: ${d20Roll}${hitBonus >= 0 ? "+" : ""}${hitBonus}=${hitTotal}] ${hitLabel}${playerDamage > 0 ? ` Dealt ${playerDamage} damage.` : ""}`);
 
     } else if (action === "defend") {
       defended = true;
-      skipCA   = true;  // handled here with bonus def
-      const roll6 = d6();
-      damageTaken = Math.max(1, effEnemyAtk + roll6 - basePlayerDef - 4);
-      combatLog.push(lang === "ko"
-        ? `🛡 방어 자세! 적의 공격을 ${damageTaken} 피해로 흡수했습니다.`
-        : `🛡 Defended! Absorbed the enemy's attack for ${damageTaken} damage.`);
+      skipCA   = true;
+
+      const d20Roll  = rollD20();
+      const defBonus = basePlayerDef;
+      const defTotal = d20Roll + defBonus;
+      const dc       = blockDC(effEnemyAtk);
+      const perfect  = d20Roll === 20;
+      const blocked  = perfect || defTotal >= dc;
+
+      if (perfect) {
+        damageTaken = 0;
+        combatLog.push(lang === "ko"
+          ? `🛡 [d20: ${d20Roll}+${defBonus}=${defTotal}] 완벽한 방어! 피해 없음.`
+          : `🛡 [d20: ${d20Roll}+${defBonus}=${defTotal}] Perfect block! No damage.`);
+      } else if (blocked) {
+        damageTaken = Math.max(1, effEnemyAtk - basePlayerDef - 4);
+        combatLog.push(lang === "ko"
+          ? `🛡 [d20: ${d20Roll}+${defBonus}=${defTotal}] 방어 성공! ${damageTaken} 피해 흡수.`
+          : `🛡 [d20: ${d20Roll}+${defBonus}=${defTotal}] Blocked! Absorbed, took ${damageTaken} dmg.`);
+      } else {
+        const roll6 = d6();
+        damageTaken = Math.max(1, effEnemyAtk + roll6 - basePlayerDef);
+        combatLog.push(lang === "ko"
+          ? `🛡 [d20: ${d20Roll}+${defBonus}=${defTotal}] 방어 실패! ${damageTaken} 피해.`
+          : `🛡 [d20: ${d20Roll}+${defBonus}=${defTotal}] Block failed! Took ${damageTaken} dmg.`);
+      }
 
     } else if (action === "skill") {
       usedSkill = skills.find(s => s.id === skillId && s.currentCooldown === 0);

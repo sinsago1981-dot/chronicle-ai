@@ -11,6 +11,31 @@ function playerDefRating(stats: Stats): number {
   return Math.floor((stats.strength + stats.will) / 5);
 }
 
+// mirrors server-side DCs
+function attackHitDC(enemyDef: number): number { return 8 + Math.floor(enemyDef / 2); }
+function blockDCFn(enemyAtk: number):   number { return 8 + Math.floor(enemyAtk / 2); }
+
+function effectiveEnemyStatMod(enemy: Enemy): number {
+  let defMod = 0;
+  for (const se of enemy.statusEffects ?? []) defMod += se.defMod;
+  return defMod;
+}
+function effectiveEnemyAtkMod(enemy: Enemy): number {
+  let mod = 0;
+  for (const se of enemy.statusEffects ?? []) mod += se.atkMod;
+  return mod;
+}
+
+// Hit chance for attack (nat 1 = fumble, nat 20 = crit always hits)
+function attackHitChance(stats: Stats, enemy: Enemy): number {
+  const effDef = Math.max(0, enemy.defense + effectiveEnemyStatMod(enemy));
+  const dc     = attackHitDC(effDef);
+  const bonus  = statMod(stats.strength);
+  const needed = Math.max(2, Math.min(20, dc - bonus));   // nat 1 always misses, nat 20 always hits
+  return Math.round(((20 - needed + 1) / 20) * 100);
+}
+
+// Damage range on a successful hit
 function attackRange(stats: Stats, enemy: Enemy): { min: number; max: number } {
   const effDef = Math.max(0, enemy.defense + effectiveEnemyStatMod(enemy));
   const min = Math.max(1, stats.strength + 1 - effDef);
@@ -25,18 +50,24 @@ function skillAttackRange(stats: Stats, enemy: Enemy, _skill: Skill, bonusDmg: n
   return { min, max };
 }
 
-function effectiveEnemyStatMod(enemy: Enemy): number {
-  let defMod = 0;
-  for (const se of enemy.statusEffects ?? []) defMod += se.defMod;
-  return defMod;
+// Block success chance
+function blockChance(stats: Stats, enemy: Enemy): number {
+  const effAtk = Math.max(0, enemy.attack + effectiveEnemyAtkMod(enemy));
+  const dc     = blockDCFn(effAtk);
+  const bonus  = playerDefRating(stats);
+  const needed = Math.max(1, Math.min(19, dc - bonus));   // nat 20 always blocks
+  return Math.round(((20 - needed + 1) / 20) * 100);
 }
 
-function defendRange(stats: Stats, enemy: Enemy): { min: number; max: number } {
-  const def = playerDefRating(stats) + 4;
+// Damage ranges for defend (success / failure) and raw incoming
+function defendRange(stats: Stats, enemy: Enemy): { success: { min: number; max: number }; fail: { min: number; max: number } } {
+  const def    = playerDefRating(stats);
   const effAtk = Math.max(0, enemy.attack + effectiveEnemyAtkMod(enemy));
-  const min = Math.max(1, effAtk + 1 - def);
-  const max = Math.max(1, effAtk + 6 - def);
-  return { min, max };
+  const successMin = Math.max(1, effAtk - def - 4);
+  const successMax = successMin;                                    // no dice added on success
+  const failMin    = Math.max(1, effAtk + 1 - def);
+  const failMax    = Math.max(1, effAtk + 6 - def);
+  return { success: { min: successMin, max: successMax }, fail: { min: failMin, max: failMax } };
 }
 
 function normalIncomingRange(stats: Stats, enemy: Enemy): { min: number; max: number } {
@@ -45,12 +76,6 @@ function normalIncomingRange(stats: Stats, enemy: Enemy): { min: number; max: nu
   const min = Math.max(1, effAtk + 1 - def);
   const max = Math.max(1, effAtk + 6 - def);
   return { min, max };
-}
-
-function effectiveEnemyAtkMod(enemy: Enemy): number {
-  let mod = 0;
-  for (const se of enemy.statusEffects ?? []) mod += se.atkMod;
-  return mod;
 }
 
 // ─── Status Badge ─────────────────────────────────────────────────────────────
@@ -140,9 +165,11 @@ export const CombatPanel = memo(function CombatPanel({
   const [showSkills, setShowSkills] = useState(false);
   const [showItems,  setShowItems]  = useState(false);
 
-  const atk = attackRange(stats, enemy);
-  const def = defendRange(stats, enemy);
-  const inc = normalIncomingRange(stats, enemy);
+  const atk     = attackRange(stats, enemy);
+  const hitPct  = attackHitChance(stats, enemy);
+  const def     = defendRange(stats, enemy);
+  const blkPct  = blockChance(stats, enemy);
+  const inc     = normalIncomingRange(stats, enemy);
   const readySkills = skills.filter(s => s.currentCooldown === 0);
   const consumables = inventory.filter(i => i.type === "consumable" && i.quantity > 0);
   const isStunned   = (enemy.statusEffects ?? []).some(s => s.id === "stun");
@@ -174,12 +201,15 @@ export const CombatPanel = memo(function CombatPanel({
           <div className="flex items-center gap-1.5">
             <Sword className="w-3.5 h-3.5 text-red-400 shrink-0" />
             <span className="text-sm font-semibold text-red-300">{t("Attack", "공격")}</span>
+            <span className={`ml-auto text-[10px] font-bold ${hitPct >= 70 ? "text-green-400" : hitPct >= 45 ? "text-yellow-400" : "text-red-400"}`}>
+              {hitPct}%
+            </span>
           </div>
           <span className="text-[11px] text-white/50">
-            ~{atk.min}–{atk.max} dmg
+            {t("hit", "명중")} · {atk.min}–{atk.max} {t("dmg", "피해")}
             {isStunned && <span className="ml-1 text-yellow-400">{t("(stunned)", "(기절)")}</span>}
           </span>
-          <span className="text-[10px] text-white/30">{t("uses STR", "STR 사용")}</span>
+          <span className="text-[10px] text-white/30">{t("d20 + STR", "d20 + STR")}</span>
         </motion.button>
 
         {/* Defend */}
@@ -192,14 +222,15 @@ export const CombatPanel = memo(function CombatPanel({
           <div className="flex items-center gap-1.5">
             <Shield className="w-3.5 h-3.5 text-blue-400 shrink-0" />
             <span className="text-sm font-semibold text-blue-300">{t("Defend", "방어")}</span>
+            <span className={`ml-auto text-[10px] font-bold ${blkPct >= 70 ? "text-green-400" : blkPct >= 45 ? "text-yellow-400" : "text-red-400"}`}>
+              {blkPct}%
+            </span>
           </div>
           <span className="text-[11px] text-white/50">
-            {t("take", "받는")} ~{def.min}–{def.max} dmg
-            <span className="text-green-400 ml-1">
-              {t(`vs ~${inc.min}–${inc.max}`, `일반 ~${inc.min}–${inc.max}`)}
-            </span>
+            {t("ok", "성공")} {def.success.min} · {t("fail", "실패")} {def.fail.min}–{def.fail.max}
+            <span className="text-white/30 ml-1">{t(`vs ~${inc.min}–${inc.max}`, `일반 ~${inc.min}–${inc.max}`)}</span>
           </span>
-          <span className="text-[10px] text-white/30">{t("+4 DEF bonus", "+4 방어 보너스")}</span>
+          <span className="text-[10px] text-white/30">{t("d20 + DEF", "d20 + DEF")}</span>
         </motion.button>
       </div>
 
