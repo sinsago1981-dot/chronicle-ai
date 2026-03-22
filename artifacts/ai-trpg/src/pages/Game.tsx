@@ -17,6 +17,7 @@ import { EnemyPanel } from "@/components/EnemyPanel";
 import { SkillsBar } from "@/components/SkillsBar";
 import { ItemsPanel } from "@/components/ItemsPanel";
 import { CombatPanel } from "@/components/CombatPanel";
+import { LoadingScreen } from "@/components/LoadingScreen";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -601,14 +602,7 @@ export default function Game() {
   useEffect(() => () => { if (clearTimer.current) clearTimeout(clearTimer.current); }, []);
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <Loader2 className="w-10 h-10 text-primary animate-spin mx-auto" />
-          <p className="text-muted-foreground animate-pulse">{t.loadingStory}</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen variant="full" />;
   }
 
   const pastBeats  = beats.slice(0, -1);
@@ -1120,12 +1114,11 @@ export default function Game() {
             </AnimatePresence>
 
             {/* Loading (no dice) */}
-            {choiceMutation.isPending && dicePhase === "idle" && (
-              <div className="flex items-center gap-2 text-muted-foreground/50 text-sm">
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                <span className="animate-pulse">{t.loadingStory}</span>
-              </div>
-            )}
+            <AnimatePresence>
+              {choiceMutation.isPending && dicePhase === "idle" && (
+                <LoadingScreen variant="turn" />
+              )}
+            </AnimatePresence>
 
             {/* Ending */}
             {isEnded && allRevealed && (

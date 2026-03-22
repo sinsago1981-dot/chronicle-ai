@@ -10,6 +10,7 @@ import { useLang } from "@/lib/i18n";
 import { LangToggle } from "@/components/LangToggle";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Skill, SkillType } from "@/types";
+import { LoadingScreen } from "@/components/LoadingScreen";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -315,6 +316,10 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      <AnimatePresence>
+        {startMutation.isPending && <LoadingScreen variant="full" />}
+      </AnimatePresence>
+
       <header className="border-b border-border/40 px-4 py-3 flex justify-between items-center">
         <div className="w-20">
           {step > 1 && !startMutation.isPending && (
