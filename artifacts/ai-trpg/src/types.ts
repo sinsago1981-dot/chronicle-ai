@@ -47,6 +47,17 @@ export type Skill = {
   currentCooldown: number;
   statRequirement?: { stat: keyof Omit<Stats, "hp" | "maxHp">; min: number };
   available?: boolean; // set by server for skill-pool response
+  enhanced?: boolean;
+};
+
+export type SkillUpgradeOption = {
+  type: "enhance" | "transform";
+  skillId: string;
+  toSkillId?: string;
+  name: string;
+  nameKo: string;
+  description: string;
+  descriptionKo: string;
 };
 
 // ─── Status effects ────────────────────────────────────────────────────────────
@@ -142,6 +153,10 @@ export type SkillChoice = {
   choiceText: string;
 };
 
+export type LevelUpData = {
+  upgradeOptions: SkillUpgradeOption[];
+};
+
 export type StoryResponse = {
   narration:              string;
   choices:                string[];
@@ -165,4 +180,5 @@ export type StoryResponse = {
   keyItemChoices?:        KeyItemChoice[];
   skillChoices?:          SkillChoice[];
   expiredKeyItemNames?:   string[];
+  levelUp?:               LevelUpData;
 };

@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import {
   Loader2, ArrowLeft, BookOpen, Trophy, Skull, Dices, User, Zap, Key, ShoppingBag, ScrollText, ChevronDown, ChevronUp,
 } from "lucide-react";
-import type { StoryResponse, Stats, StatChanges, RollResult, DiceOutcome, Skill, Enemy, EnemyChanges, Item, KeyItemChoice, SkillChoice } from "@/types";
+import type { StoryResponse, Stats, StatChanges, RollResult, DiceOutcome, Skill, Enemy, EnemyChanges, Item, KeyItemChoice, SkillChoice, SkillUpgradeOption } from "@/types";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLang } from "@/lib/i18n";
 import { LangToggle } from "@/components/LangToggle";
@@ -297,6 +297,9 @@ export default function Game() {
   const [skillChoices,          setSkillChoices]         = useState<SkillChoice[]>([]);
   const expiredItemTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Level-up skill upgrade panel
+  const [pendingLevelUp, setPendingLevelUp] = useState<SkillUpgradeOption[] | null>(null);
+
   // Dice phase
   const [pendingChoice, setPendingChoice] = useState<{ index: number; text: string } | null>(null);
   const [dicePhase,     setDicePhase]     = useState<DicePhase>("idle");
@@ -450,6 +453,11 @@ export default function Game() {
         if (expiredItemTimer.current) clearTimeout(expiredItemTimer.current);
         expiredItemTimer.current = setTimeout(() => setExpiredItems([]), 5000);
       }
+
+      // Level-up: show skill upgrade panel
+      if (data.levelUp?.upgradeOptions && data.levelUp.upgradeOptions.length > 0) {
+        setPendingLevelUp(data.levelUp.upgradeOptions);
+      }
     },
     onError: (err: unknown) => {
       if (!isMountedRef.current) return;
@@ -577,11 +585,31 @@ export default function Game() {
       setIsTyping(true);
       setSkipTyping(false);
       if (data.isEnding) setIsEnded(true);
+
+      // Level-up: show skill upgrade panel
+      if (data.levelUp?.upgradeOptions && data.levelUp.upgradeOptions.length > 0) {
+        setPendingLevelUp(data.levelUp.upgradeOptions);
+      }
     },
     onError: (err: unknown) => {
       if (!isMountedRef.current) return;
       const msg = err instanceof Error ? err.message : String(err);
       console.error("[combat-action] mutation error:", msg);
+    },
+  });
+
+  const upgradeSkillMutation = useMutation({
+    mutationFn: async (opts: SkillUpgradeOption) => {
+      const res = await apiRequest("POST", `/api/game/${sessionId}/upgrade-skill`, {
+        upgradeType: opts.type,
+        skillId: opts.skillId,
+        toSkillId: opts.toSkillId,
+      });
+      return res.json() as Promise<{ skills: Skill[] }>;
+    },
+    onSuccess: (data) => {
+      if (data.skills) setSkills(data.skills);
+      setPendingLevelUp(null);
     },
   });
 
@@ -1001,6 +1029,48 @@ export default function Game() {
                               </Button>
                             );
                           })}
+                        </motion.div>
+                      )}
+
+                      {/* Level-up skill upgrade panel */}
+                      {pendingLevelUp && pendingLevelUp.length > 0 && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 6 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="space-y-2 pt-1"
+                        >
+                          <div className="flex items-center gap-2">
+                            <div className="flex-1 h-px bg-violet-500/30" />
+                            <div className="flex items-center gap-1.5">
+                              <Zap className="w-3 h-3 text-violet-400 animate-pulse" />
+                              <span className="text-[9px] font-black text-violet-400 uppercase tracking-widest">
+                                {lang === "ko" ? "성장 선택" : "GROWTH CHOICE"}
+                              </span>
+                              <Zap className="w-3 h-3 text-violet-400 animate-pulse" />
+                            </div>
+                            <div className="flex-1 h-px bg-violet-500/30" />
+                          </div>
+                          {pendingLevelUp.map((opt, idx) => (
+                            <Button
+                              key={idx}
+                              variant="outline"
+                              disabled={upgradeSkillMutation.isPending}
+                              className="w-full text-left h-auto py-2.5 px-4 justify-start border-violet-500/40 hover:border-violet-400/70 hover:bg-violet-950/20 transition-all group"
+                              onClick={() => upgradeSkillMutation.mutate(opt)}
+                            >
+                              <div className="space-y-0.5 w-full">
+                                <div className="flex items-center gap-2">
+                                  <Zap className="w-3 h-3 text-violet-400/80 shrink-0" />
+                                  <span className="text-xs font-bold text-violet-300/90 group-hover:text-violet-200">
+                                    {lang === "ko" ? opt.nameKo : opt.name}
+                                  </span>
+                                </div>
+                                <p className="text-xs text-foreground/70 pl-5 break-words whitespace-normal leading-snug">
+                                  {lang === "ko" ? opt.descriptionKo : opt.description}
+                                </p>
+                              </div>
+                            </Button>
+                          ))}
                         </motion.div>
                       )}
 

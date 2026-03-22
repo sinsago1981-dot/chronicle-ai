@@ -33,6 +33,7 @@ type Skill = {
   bonusValue: number; hpEffect?: number;
   cooldown: number; currentCooldown: number;
   statRequirement?: { stat: keyof Omit<Stats, "hp" | "maxHp">; min: number };
+  enhanced?: boolean;
 };
 
 type Enemy = { name: string; nameKo?: string; hp: number; maxHp: number; attack: number; defense: number };
@@ -49,12 +50,24 @@ type Item = {
   situational?: boolean; condition?: string;
 };
 
+type SkillUpgradeOption = {
+  type: "enhance" | "transform";
+  skillId: string;
+  toSkillId?: string;
+  name: string;
+  nameKo: string;
+  description: string;
+  descriptionKo: string;
+};
+
 type PlayerMeta = {
   name: string;
   characterClass: string;
   skills: Skill[];
   goal: string;
   goalShort: string;
+  level: number;
+  xp: number;
 };
 
 // ─── In-memory state ──────────────────────────────────────────────────────────
@@ -64,9 +77,106 @@ const enemyMap              = new Map<number, Enemy | null>();
 const playerMetas           = new Map<number, PlayerMeta>();
 const inventoryMap          = new Map<number, Item[]>();
 const worldEventsMap        = new Map<number, string[]>();
-const pendingKeyItemsMap    = new Map<number, string[]>(); // itemIds offered last turn
+const pendingKeyItemsMap        = new Map<number, string[]>();    // itemIds offered last turn
+const pendingLevelUpNarrativeMap = new Map<number, boolean>();     // flag: next AI call should weave in body-change narration
+const pendingUpgradesMap         = new Map<number, SkillUpgradeOption[]>(); // upgrade options waiting for player choice
 
 const MAX_WORLD_EVENTS = 25;
+
+// ─── Level system constants ───────────────────────────────────────────────────
+
+// Cumulative XP required to reach level N+1 (index 0 = level 1)
+const XP_THRESHOLDS = [0, 3, 7, 12, 18, 25, 33, 42, 52, 63];
+const MAX_LEVEL = XP_THRESHOLDS.length;
+
+function getLevelFromXp(xp: number): number {
+  let level = 1;
+  for (let i = 0; i < XP_THRESHOLDS.length; i++) {
+    if (xp >= XP_THRESHOLDS[i]) level = i + 1;
+    else break;
+  }
+  return Math.min(level, MAX_LEVEL);
+}
+
+function getPrimaryStatBonus(characterClass: string): keyof Omit<Stats, "hp" | "maxHp"> {
+  const en = (KO_TO_EN as Record<string, string>)[characterClass] ?? characterClass;
+  if (["Warrior", "Ironclad"].includes(en)) return "strength";
+  if (["Rogue", "Ranger", "Bard", "Drifter"].includes(en)) return "cunning";
+  return "will"; // Mage, Paladin, Necromancer, Druid, Hexblade, Alchemist
+}
+
+function generateSkillUpgradeOptions(skills: Skill[], characterClass: string): SkillUpgradeOption[] {
+  const options: SkillUpgradeOption[] = [];
+
+  // Offer "enhance" for up to 2 of the player's skills
+  const enhanceable = skills.slice(0, 3);
+  for (const skill of enhanceable.slice(0, 2)) {
+    if (skill.hpEffect && skill.hpEffect > 0) {
+      const bonus = Math.max(3, Math.ceil(skill.hpEffect * 0.3));
+      options.push({
+        type: "enhance", skillId: skill.id,
+        name: skill.name, nameKo: skill.nameKo,
+        description: `${skill.name}: +${bonus} HP recovery`,
+        descriptionKo: `${skill.nameKo}: +${bonus} HP 회복 증가`,
+      });
+    } else if (skill.cooldown > 1) {
+      options.push({
+        type: "enhance", skillId: skill.id,
+        name: skill.name, nameKo: skill.nameKo,
+        description: `${skill.name}: Cooldown reduced to ${skill.cooldown - 1}`,
+        descriptionKo: `${skill.nameKo}: 쿨다운 ${skill.cooldown - 1}로 감소`,
+      });
+    } else {
+      options.push({
+        type: "enhance", skillId: skill.id,
+        name: skill.name, nameKo: skill.nameKo,
+        description: `${skill.name}: +1 stat bonus`,
+        descriptionKo: `${skill.nameKo}: +1 능력치 보너스`,
+      });
+    }
+  }
+
+  // Offer "transform" — swap a skill for a new one from the class pool
+  const pool   = getClassSkillPool(characterClass);
+  const owned  = new Set(skills.map(s => s.id));
+  const unowned = pool.filter(s => !owned.has(s.id));
+  if (unowned.length > 0 && skills.length > 0) {
+    const toSkill   = unowned[Math.floor(Math.random() * Math.min(3, unowned.length))];
+    const fromSkill = skills[skills.length - 1];
+    options.push({
+      type: "transform", skillId: fromSkill.id, toSkillId: toSkill.id,
+      name: fromSkill.name, nameKo: fromSkill.nameKo,
+      description: `Transform ${fromSkill.name} → ${toSkill.name}`,
+      descriptionKo: `${fromSkill.nameKo} → ${toSkill.nameKo}로 변환`,
+    });
+  }
+
+  return options;
+}
+
+function applySkillEnhancement(skill: Skill): Skill {
+  const s: Skill = { ...skill, enhanced: true };
+  if (s.hpEffect && s.hpEffect > 0) {
+    s.hpEffect = s.hpEffect + Math.max(3, Math.ceil(s.hpEffect * 0.3));
+  } else if (s.cooldown > 1) {
+    s.cooldown = s.cooldown - 1;
+  } else {
+    s.bonusValue = s.bonusValue + 1;
+  }
+  return s;
+}
+
+// Scale stats for a brand-new enemy based on player level
+function scaleEnemyForLevel(
+  hp: number, maxHp: number, attack: number, defense: number, level: number
+): { hp: number; maxHp: number; attack: number; defense: number } {
+  if (level <= 1) return { hp, maxHp, attack, defense };
+  const f = 1 + (level - 1) * 0.12; // 12% per level above 1
+  const sHp  = Math.round(maxHp  * f);
+  const sAtk = Math.round(attack  * f);
+  const sDef = Math.round(defense * f);
+  return { hp: sHp, maxHp: sHp, attack: Math.min(20, sAtk), defense: Math.min(14, sDef) };
+}
 
 function addWorldEvents(sessionId: number, events: string[], turn: number): void {
   const existing = worldEventsMap.get(sessionId) ?? [];
@@ -679,8 +789,11 @@ ALWAYS respond with valid JSON only, no markdown:
   "keyItemChoices": [],
   "skillChoices": [],
   "goal": "(only in opening response)",
-  "goalShort": "(only in opening response)"
-}`;
+  "goalShort": "(only in opening response)",
+  "majorMoment": false
+}
+
+When a major story milestone is crossed — not combat, but a pivotal narrative turning point (a key revelation, betrayal, alliance formed, irreversible decision, a mystery unlocked) — set "majorMoment": true in your response. Use this sparingly (at most once every 4-5 turns).`;
 
 const SYSTEM_PROMPT_KO = `당신은 주사위 기반 스탯 시스템이 있는 오픈 월드 다크 RPG의 마스터 스토리텔러입니다.
 
@@ -1043,8 +1156,11 @@ NPC들이 모든 것을 알 필요는 없음 — 하지만 그들이 속한 공�
   "keyItemChoices": [],
   "skillChoices": [],
   "goal": "(첫 번째 응답에서만)",
-  "goalShort": "(첫 번째 응답에서만)"
-}`;
+  "goalShort": "(첫 번째 응답에서만)",
+  "majorMoment": false
+}
+
+서사적으로 중요한 전환점이 있을 때 (핵심 비밀 폭로, 배신, 중요 동맹 결성, 돌이킬 수 없는 결정, 미스터리 해결) — 전투가 아닌 스토리의 전환점에서 "majorMoment": true를 설정하세요. 4~5턴에 한 번 정도로 절제하여 사용하세요.`;
 
 const OUTCOME_CONTEXT_EN: Record<DiceOutcome, string> = {
   critical_failure: "CRITICAL FAILURE — everything goes catastrophically wrong",
@@ -1250,12 +1366,12 @@ Choice C: Move toward the next location where the story will continue
     // Store goal in player meta
     const goal      = data.goal      ?? (lang === "ko" ? "알 수 없는 목표" : "Complete your mission");
     const goalShort = data.goalShort ?? (lang === "ko" ? "임무를 완수하라" : "Complete your mission");
-    playerMetas.set(session.id, { name: playerName || "", characterClass: classStr, skills, goal, goalShort });
+    playerMetas.set(session.id, { name: playerName || "", characterClass: classStr, skills, goal, goalShort, level: 1, xp: 0 });
 
     const startState = {
       stats: startingStats,
       inventory: [],
-      meta: { name: playerName || "", characterClass: classStr, skills, goal, goalShort },
+      meta: { name: playerName || "", characterClass: classStr, skills, goal, goalShort, level: 1, xp: 0 },
       worldEvents: [],
       enemy: null,
     };
@@ -1289,7 +1405,7 @@ router.get("/:id", async (req, res) => {
           if (d._state) {
             if (d._state.stats)                          statsMap.set(id, d._state.stats);
             if (d._state.inventory)                      inventoryMap.set(id, d._state.inventory);
-            if (d._state.meta)                           playerMetas.set(id, d._state.meta);
+            if (d._state.meta)                           playerMetas.set(id, { level: 1, xp: 0, ...d._state.meta });
             if (d._state.enemy !== undefined)            enemyMap.set(id, d._state.enemy);
             if (Array.isArray(d._state.worldEvents))     worldEventsMap.set(id, d._state.worldEvents);
             if (d._state.statusEffects)                  statusEffectsMap.set(id, d._state.statusEffects);
@@ -1460,7 +1576,14 @@ router.post("/:id/choice", async (req, res) => {
           : `\n[ACTIVE COMPANIONS] ${companionEvents.join(" | ")} — they are present in the scene and contribute actions and opinions.`)
       : "";
 
-    const userMsg = `Player chose option ${choiceIndex + 1}: "${choiceText}"${skillNote}${keyItemNote}\n\nDICE ROLL: ${outcomeCtx}\nRolled: d20=${roll.raw}, ${roll.stat.toUpperCase()} modifier=${roll.modifier > 0 ? "+" : ""}${roll.modifier}, Total=${roll.total}${enemyNote}${goalNote}${inventoryNote}${worldMemoryNote}${skillsNote}${repTierNote}${socialSkillNote}${companionNote}\nPlayer stats: HP ${statsBeforeRoll.hp}/${statsBeforeRoll.maxHp}, STR ${statsBeforeRoll.strength}, CUN ${statsBeforeRoll.cunning}, WIL ${statsBeforeRoll.will}, REP ${statsBeforeRoll.reputation}\nTurn: ${session.turnCount + 1}`;
+    // Level-up narrative hint: weave body-change description into this scene naturally
+    const levelUpNarrativeNote = pendingLevelUpNarrativeMap.get(sessionId)
+      ? (lang === "ko"
+          ? `\n[성장 서술 — 수치 공개 금지] 이번 장면 서사 안에 한 문장을 자연스럽게 녹여 넣으세요: 몸이 전보다 가볍게 느껴진다, 호흡이 더 깊어진다, 감각이 날카로워진다 같은 신체·정신적 변화. 숫자나 "레벨 업" 같은 표현은 절대 사용 금지.`
+          : `\n[GROWTH NARRATION — NO NUMBERS] Weave one natural sentence into this scene's narration: the character's body feels lighter, breathing deeper, senses sharper — a subtle physical or mental change hinting at growth. NO stat numbers, NO "level up", NO "you grew stronger" phrasing.`)
+      : "";
+
+    const userMsg = `Player chose option ${choiceIndex + 1}: "${choiceText}"${skillNote}${keyItemNote}\n\nDICE ROLL: ${outcomeCtx}\nRolled: d20=${roll.raw}, ${roll.stat.toUpperCase()} modifier=${roll.modifier > 0 ? "+" : ""}${roll.modifier}, Total=${roll.total}${enemyNote}${goalNote}${inventoryNote}${worldMemoryNote}${skillsNote}${repTierNote}${socialSkillNote}${companionNote}${levelUpNarrativeNote}\nPlayer stats: HP ${statsBeforeRoll.hp}/${statsBeforeRoll.maxHp}, STR ${statsBeforeRoll.strength}, CUN ${statsBeforeRoll.cunning}, WIL ${statsBeforeRoll.will}, REP ${statsBeforeRoll.reputation}\nTurn: ${session.turnCount + 1}`;
 
     messages.push({ role: "user", content: userMsg });
 
@@ -1526,6 +1649,42 @@ router.post("/:id/choice", async (req, res) => {
 
     statsMap.set(sessionId, newBaseStats);
 
+    // ── Level-up detection (choice route) ───────────────────────────────────
+    const currentMeta = playerMetas.get(sessionId) ?? { level: 1, xp: 0 } as PlayerMeta;
+    const oldLevel    = currentMeta.level ?? 1;
+    let   currentXp   = currentMeta.xp   ?? 0;
+
+    const enemyKilledViaChoice = currentEnemy !== null && (!data.inCombat || !data.enemy);
+    if (enemyKilledViaChoice)    currentXp += 1;
+    if (data.goalAchieved)       currentXp += 2;
+    if (data.majorMoment === true) currentXp += 1;
+
+    const newLevel = getLevelFromXp(currentXp);
+    let levelUpData: SkillUpgradeOption[] | null = null;
+
+    if (newLevel > oldLevel && newBaseStats.hp > 0) {
+      // Apply silent stat bonuses
+      const statKey = getPrimaryStatBonus(currentMeta.characterClass ?? "");
+      newBaseStats.maxHp       = newBaseStats.maxHp + 8;
+      newBaseStats.hp          = Math.min(newBaseStats.maxHp, newBaseStats.hp + 8);
+      newBaseStats[statKey]    = Math.min(10, (newBaseStats[statKey] ?? 1) + 1);
+      statsMap.set(sessionId, newBaseStats);
+
+      // Generate upgrade options and store them
+      const opts = generateSkillUpgradeOptions(skills, currentMeta.characterClass ?? "");
+      pendingUpgradesMap.set(sessionId, opts);
+      pendingLevelUpNarrativeMap.set(sessionId, true);
+      levelUpData = opts;
+    } else {
+      // Clear narrative flag once used
+      pendingLevelUpNarrativeMap.delete(sessionId);
+    }
+
+    // Update meta with new xp/level
+    if (currentMeta && playerMetas.has(sessionId)) {
+      playerMetas.set(sessionId, { ...currentMeta, xp: currentXp, level: newLevel, skills });
+    }
+
     // Handle items gained from AI response
     if (Array.isArray(data.itemsGained) && data.itemsGained.length > 0) {
       const updatedInventory = mergeItems(inventory, data.itemsGained);
@@ -1545,14 +1704,22 @@ router.post("/:id/choice", async (req, res) => {
       serverTrackedHp = 0;
     }
 
+    const isNewEnemy = !currentEnemy && data.inCombat && data.enemy;
+    const rawMaxHp  = data.enemy?.maxHp   ?? currentEnemy?.maxHp   ?? serverTrackedHp;
+    const rawAtk    = data.enemy?.attack  ?? currentEnemy?.attack  ?? 5;
+    const rawDef    = data.enemy?.defense ?? currentEnemy?.defense ?? 2;
+    const scaledStats = isNewEnemy
+      ? scaleEnemyForLevel(serverTrackedHp, rawMaxHp, rawAtk, rawDef, newLevel)
+      : { hp: serverTrackedHp, maxHp: rawMaxHp, attack: rawAtk, defense: rawDef };
+
     const newEnemy: Enemy | null = data.inCombat && data.enemy
       ? {
           name:    data.enemy.name    ?? currentEnemy?.name    ?? "Unknown",
           nameKo:  data.enemy.nameKo  ?? currentEnemy?.nameKo,
-          hp:      serverTrackedHp,
-          maxHp:   data.enemy.maxHp   ?? currentEnemy?.maxHp   ?? serverTrackedHp,
-          attack:  data.enemy.attack  ?? currentEnemy?.attack  ?? 5,
-          defense: data.enemy.defense ?? currentEnemy?.defense ?? 2,
+          hp:      scaledStats.hp,
+          maxHp:   scaledStats.maxHp,
+          attack:  scaledStats.attack,
+          defense: scaledStats.defense,
         }
       : null;
     enemyMap.set(sessionId, newEnemy);
@@ -1562,7 +1729,11 @@ router.post("/:id/choice", async (req, res) => {
       skills = skills.map(s => s.id === usedSkill!.id ? { ...s, currentCooldown: s.cooldown } : s);
     }
     skills = tickSkillCooldowns(skills);
-    if (meta) playerMetas.set(sessionId, { ...meta, skills });
+    // Persist meta — merge xp/level from level-up detection, ticked skills from here
+    {
+      const latestMeta = playerMetas.get(sessionId) ?? meta;
+      if (latestMeta) playerMetas.set(sessionId, { ...latestMeta, skills });
+    }
 
     // Persist — include full state snapshot for server-restart recovery
     const choiceStateSnapshot = {
@@ -1612,6 +1783,7 @@ router.post("/:id/choice", async (req, res) => {
       keyItemChoices: newKeyItemChoices,
       skillChoices: newSkillChoices,
       expiredKeyItemNames,
+      ...(levelUpData ? { levelUp: { upgradeOptions: levelUpData } } : {}),
     });
   } catch (err) {
     req.log.error(err, "Error processing choice");
@@ -2253,7 +2425,32 @@ router.post("/:id/combat-action", async (req, res) => {
     enemyMap.set(sessionId, inCombat ? newEnemy : null);
     statusEffectsMap.set(sessionId, inCombat ? sfx : { player: [], enemy: [] });
     skills = tickSkillCooldowns(skills);
-    if (meta) playerMetas.set(sessionId, { ...meta, skills });
+
+    // ── Level-up detection (combat route) ───────────────────────────────────
+    const combatMeta = playerMetas.get(sessionId) ?? meta;
+    const combatOldLevel = combatMeta?.level ?? 1;
+    let combatCurrentXp  = combatMeta?.xp ?? 0;
+    let combatLevelUpData: SkillUpgradeOption[] | null = null;
+
+    if (enemyDied && !playerDied) combatCurrentXp += 1;
+
+    const combatNewLevel = getLevelFromXp(combatCurrentXp);
+    if (combatNewLevel > combatOldLevel && !playerDied) {
+      const statKey = getPrimaryStatBonus(combatMeta?.characterClass ?? "");
+      newStats.maxHp       = newStats.maxHp + 8;
+      newStats.hp          = Math.min(newStats.maxHp, newStats.hp + 8);
+      newStats[statKey]    = Math.min(10, (newStats[statKey] ?? 1) + 1);
+      statsMap.set(sessionId, newStats);
+
+      const opts = generateSkillUpgradeOptions(skills, combatMeta?.characterClass ?? "");
+      pendingUpgradesMap.set(sessionId, opts);
+      pendingLevelUpNarrativeMap.set(sessionId, true);
+      combatLevelUpData = opts;
+    }
+
+    if (combatMeta) {
+      playerMetas.set(sessionId, { ...combatMeta, xp: combatCurrentXp, level: combatNewLevel, skills });
+    }
 
     // ── Build AI narration ──────────────────────────────────────────────────
     const entries = await db.select().from(storyEntries).where(eq(storyEntries.sessionId, sessionId));
@@ -2382,12 +2579,48 @@ router.post("/:id/combat-action", async (req, res) => {
       itemsGained: aiData.itemsGained ?? [],
       combatResult,
       worldEvents: worldEventsMap.get(sessionId) ?? [],
+      ...(combatLevelUpData ? { levelUp: { upgradeOptions: combatLevelUpData } } : {}),
     });
   } catch (err) {
     req.log.error(err, "Error processing combat action");
     res.status(500).json({ error: "Failed to process combat action" });
   } finally {
     inFlightSessions.delete(sessionId);
+  }
+});
+
+// ─── POST /:id/upgrade-skill ──────────────────────────────────────────────────
+router.post("/:id/upgrade-skill", async (req, res) => {
+  try {
+    const sessionId = parseInt(req.params.id);
+    if (isNaN(sessionId)) return res.status(400).json({ error: "Invalid session id" });
+
+    const { upgradeType, skillId, toSkillId } = req.body;
+    if (!upgradeType || !skillId) return res.status(400).json({ error: "upgradeType and skillId required" });
+
+    const meta = playerMetas.get(sessionId);
+    if (!meta) return res.status(404).json({ error: "Session not found in memory" });
+
+    let skills = [...meta.skills];
+
+    if (upgradeType === "enhance") {
+      skills = skills.map(s => s.id === skillId ? applySkillEnhancement(s) : s);
+    } else if (upgradeType === "transform" && toSkillId) {
+      const pool   = getClassSkillPool(meta.characterClass);
+      const newSkill = pool.find(s => s.id === toSkillId);
+      if (!newSkill) return res.status(400).json({ error: "Target skill not found in class pool" });
+      skills = skills.map(s => s.id === skillId ? { ...newSkill, currentCooldown: 0, enhanced: false } : s);
+    } else {
+      return res.status(400).json({ error: "Invalid upgrade type or missing toSkillId for transform" });
+    }
+
+    playerMetas.set(sessionId, { ...meta, skills });
+    pendingUpgradesMap.delete(sessionId);
+
+    res.json({ skills });
+  } catch (err) {
+    req.log.error(err, "Error upgrading skill");
+    res.status(500).json({ error: "Failed to upgrade skill" });
   }
 });
 
