@@ -106,6 +106,22 @@ function reconstructWorldEvents(entries: Array<{ entryType: string; content: str
   return events.slice(-MAX_WORLD_EVENTS);
 }
 
+// ─── Safe JSON parsing (handles markdown fences from LLM) ────────────────────
+function safeParseJSON(raw: string): Record<string, unknown> {
+  try {
+    const cleaned = raw
+      .replace(/^```(?:json)?\s*/i, "")
+      .replace(/```\s*$/i, "")
+      .trim();
+    return JSON.parse(cleaned);
+  } catch {
+    return {};
+  }
+}
+
+// ─── In-flight guard (prevents duplicate concurrent requests per session) ─────
+const inFlightSessions = new Set<number>();
+
 function applyEquipmentBonuses(base: Stats, inventory: Item[]): Stats {
   const equipped = inventory.filter(i => i.type === "equipment" && i.equipped);
   if (equipped.length === 0) return base;
@@ -1096,12 +1112,16 @@ router.get("/skill-pool", (req, res) => {
   let stats: Stats = CLASS_STATS[characterClass] || CLASS_STATS[classEn] || DEFAULT_STATS;
   // Allow caller to pass computed stats (e.g. from background questions)
   if (str || cun || wil || rep) {
+    const pStr = str ? parseInt(str) : NaN;
+    const pCun = cun ? parseInt(cun) : NaN;
+    const pWil = wil ? parseInt(wil) : NaN;
+    const pRep = rep ? parseInt(rep) : NaN;
     stats = {
       ...stats,
-      strength:   str ? parseInt(str)   : stats.strength,
-      cunning:    cun ? parseInt(cun)   : stats.cunning,
-      will:       wil ? parseInt(wil)   : stats.will,
-      reputation: rep ? parseInt(rep)   : stats.reputation,
+      strength:   !isNaN(pStr) ? pStr : stats.strength,
+      cunning:    !isNaN(pCun) ? pCun : stats.cunning,
+      will:       !isNaN(pWil) ? pWil : stats.will,
+      reputation: !isNaN(pRep) ? pRep : stats.reputation,
     };
   }
   const pool = getClassSkillPool(characterClass);
@@ -1216,7 +1236,7 @@ Choice C: Move toward the next location where the story will continue
     });
 
     const raw = completion.choices[0].message.content ?? "{}";
-    const data = JSON.parse(raw);
+    const data = safeParseJSON(raw);
 
     // Opening scene is NEVER in combat — override any AI mistakes
     data.inCombat     = false;
@@ -1228,8 +1248,16 @@ Choice C: Move toward the next location where the story will continue
     const goalShort = data.goalShort ?? (lang === "ko" ? "임무를 완수하라" : "Complete your mission");
     playerMetas.set(session.id, { name: playerName || "", characterClass: classStr, skills, goal, goalShort });
 
+    const startState = {
+      stats: startingStats,
+      inventory: [],
+      meta: { name: playerName || "", characterClass: classStr, skills, goal, goalShort },
+      worldEvents: [],
+      enemy: null,
+    };
     await db.insert(storyEntries).values({
-      sessionId: session.id, entryType: "narration", content: JSON.stringify(data),
+      sessionId: session.id, entryType: "narration",
+      content: JSON.stringify({ ...data, _state: startState }),
     });
 
     res.json({ sessionId: session.id, stats: startingStats, skills, goal, goalShort, ...data });
@@ -1246,18 +1274,34 @@ router.get("/:id", async (req, res) => {
     const [session] = await db.select().from(gameSessions).where(eq(gameSessions.id, id));
     if (!session) return res.status(404).json({ error: "Session not found" });
 
-    const entries    = await db.select().from(storyEntries).where(eq(storyEntries.sessionId, id));
+    const entries = await db.select().from(storyEntries).where(eq(storyEntries.sessionId, id));
+
+    // Reconstruct all in-memory state from last _state snapshot (after server restart)
+    if (!statsMap.has(id)) {
+      const lastNarration = [...entries].reverse().find(e => e.entryType === "narration");
+      if (lastNarration) {
+        try {
+          const d = JSON.parse(lastNarration.content);
+          if (d._state) {
+            if (d._state.stats)                          statsMap.set(id, d._state.stats);
+            if (d._state.inventory)                      inventoryMap.set(id, d._state.inventory);
+            if (d._state.meta)                           playerMetas.set(id, d._state.meta);
+            if (d._state.enemy !== undefined)            enemyMap.set(id, d._state.enemy);
+            if (Array.isArray(d._state.worldEvents))     worldEventsMap.set(id, d._state.worldEvents);
+            if (d._state.statusEffects)                  statusEffectsMap.set(id, d._state.statusEffects);
+          }
+        } catch { /* ignore bad entries */ }
+      }
+    }
+    if (!worldEventsMap.has(id)) {
+      worldEventsMap.set(id, reconstructWorldEvents(entries));
+    }
+
     const baseStats  = statsMap.get(id) || DEFAULT_STATS;
     const inventory  = inventoryMap.get(id) ?? [];
     const stats      = applyEquipmentBonuses(baseStats, inventory);
     const playerMeta = playerMetas.get(id);
     const enemy      = enemyMap.get(id) ?? null;
-
-    // Reconstruct world events from DB if not in memory (e.g. after server restart)
-    if (!worldEventsMap.has(id)) {
-      const reconstructed = reconstructWorldEvents(entries);
-      worldEventsMap.set(id, reconstructed);
-    }
     const worldEvents = worldEventsMap.get(id) ?? [];
 
     res.json({ session, entries, stats, playerMeta, enemy, inventory, worldEvents });
@@ -1268,9 +1312,11 @@ router.get("/:id", async (req, res) => {
 });
 
 router.post("/:id/choice", async (req, res) => {
+  const sessionId = parseInt(req.params.id);
+  if (isNaN(sessionId)) return res.status(400).json({ error: "Invalid session id" });
+  if (inFlightSessions.has(sessionId)) return res.status(429).json({ error: "Request already in progress" });
+  inFlightSessions.add(sessionId);
   try {
-    const sessionId = parseInt(req.params.id);
-    if (isNaN(sessionId)) return res.status(400).json({ error: "Invalid session id" });
     const { choiceIndex, choiceText, lang = "en", skillId, keyItemId } = req.body;
 
     const [session] = await db.select().from(gameSessions).where(eq(gameSessions.id, sessionId));
@@ -1422,8 +1468,8 @@ router.post("/:id/choice", async (req, res) => {
     });
 
     const rawResp    = completion.choices[0].message.content ?? "{}";
-    const data       = JSON.parse(rawResp);
-    const statChanges: StatChanges     = data.statChanges      || {};
+    const data       = safeParseJSON(rawResp);
+    const statChanges: StatChanges     = (data.statChanges as StatChanges)      || {};
     const worldConsequences: StatChanges = data.worldConsequences || {};
     const worldConsequenceDesc: string   = typeof data.worldConsequenceDesc === "string" ? data.worldConsequenceDesc : "";
 
@@ -1513,10 +1559,18 @@ router.post("/:id/choice", async (req, res) => {
     skills = tickSkillCooldowns(skills);
     if (meta) playerMetas.set(sessionId, { ...meta, skills });
 
-    // Persist
+    // Persist — include full state snapshot for server-restart recovery
+    const choiceStateSnapshot = {
+      stats:        newBaseStats,
+      inventory:    inventoryMap.get(sessionId) ?? [],
+      meta:         playerMetas.get(sessionId),
+      worldEvents:  worldEventsMap.get(sessionId) ?? [],
+      enemy:        enemyMap.get(sessionId) ?? null,
+      statusEffects: statusEffectsMap.get(sessionId) ?? null,
+    };
     await db.insert(storyEntries).values([
       { sessionId, entryType: "choice", content: JSON.stringify({ index: choiceIndex, text: choiceText, context: userMsg }) },
-      { sessionId, entryType: "narration", content: JSON.stringify(data), choiceIndex },
+      { sessionId, entryType: "narration", content: JSON.stringify({ ...data, _state: choiceStateSnapshot }), choiceIndex },
     ]);
 
     await db.update(gameSessions)
@@ -1557,6 +1611,8 @@ router.post("/:id/choice", async (req, res) => {
   } catch (err) {
     req.log.error(err, "Error processing choice");
     res.status(500).json({ error: "Failed to process choice" });
+  } finally {
+    inFlightSessions.delete(sessionId);
   }
 });
 
@@ -1681,8 +1737,8 @@ router.post("/:id/use-key-item", async (req, res) => {
     });
 
     const rawResp = completion.choices[0].message.content ?? "{}";
-    const data    = JSON.parse(rawResp);
-    const statChanges: StatChanges = data.statChanges || {};
+    const data    = safeParseJSON(rawResp);
+    const statChanges: StatChanges = (data.statChanges as StatChanges) || {};
 
     const newBaseStats = applyStatChanges(baseStats, statChanges);
 
@@ -1709,10 +1765,17 @@ router.post("/:id/use-key-item", async (req, res) => {
         : null;
     enemyMap.set(sessionId, serverEnemy);
 
-    // Persist
+    // Persist — include full state snapshot for server-restart recovery
+    const keyItemStateSnapshot = {
+      stats:       newBaseStats,
+      inventory:   inventoryMap.get(sessionId) ?? [],
+      meta:        playerMetas.get(sessionId),
+      worldEvents: worldEventsMap.get(sessionId) ?? [],
+      enemy:       enemyMap.get(sessionId) ?? null,
+    };
     await db.insert(storyEntries).values([
       { sessionId, entryType: "choice", content: JSON.stringify({ text: `[Key Item: ${itemName}]`, context: userMsg }) },
-      { sessionId, entryType: "narration", content: JSON.stringify(data), choiceIndex: -1 },
+      { sessionId, entryType: "narration", content: JSON.stringify({ ...data, _state: keyItemStateSnapshot }), choiceIndex: -1 },
     ]);
     await db.update(gameSessions)
       .set({ turnCount: session.turnCount + 1, updatedAt: new Date() })
@@ -1873,10 +1936,11 @@ function playerDefRating(stats: Stats): number {
 
 // ─── POST /:id/combat-action ──────────────────────────────────────────────────
 router.post("/:id/combat-action", async (req, res) => {
+  const sessionId = parseInt(req.params.id);
+  if (isNaN(sessionId)) return res.status(400).json({ error: "Invalid session id" });
+  if (inFlightSessions.has(sessionId)) return res.status(429).json({ error: "Request already in progress" });
+  inFlightSessions.add(sessionId);
   try {
-    const sessionId = parseInt(req.params.id);
-    if (isNaN(sessionId)) return res.status(400).json({ error: "Invalid session id" });
-
     const { action, skillId, itemId, lang = "en" } = req.body;
     const validActions = ["attack", "defend", "skill", "item", "flee"];
     if (!validActions.includes(action)) return res.status(400).json({ error: "Invalid combat action" });
@@ -2225,9 +2289,17 @@ router.post("/:id/combat-action", async (req, res) => {
       ? ({ attack: "공격", defend: "방어", skill: usedSkill?.nameKo ?? "스킬", item: "아이템", flee: "도주" }[action])
       : ({ attack: "Attack", defend: "Defend", skill: usedSkill?.name ?? "Skill", item: "Item", flee: "Flee" }[action]);
 
+    const combatStateSnapshot = {
+      stats:        newStats,
+      inventory:    inventoryMap.get(sessionId) ?? [],
+      meta:         playerMetas.get(sessionId),
+      worldEvents:  worldEventsMap.get(sessionId) ?? [],
+      enemy:        inCombat ? newEnemy : null,
+      statusEffects: statusEffectsMap.get(sessionId) ?? null,
+    };
     await db.insert(storyEntries).values([
       { sessionId, entryType: "choice", content: JSON.stringify({ text: `[Combat: ${actionLabel}]`, context: combatSummary }) },
-      { sessionId, entryType: "narration", content: JSON.stringify(aiData), choiceIndex: -1 },
+      { sessionId, entryType: "narration", content: JSON.stringify({ ...aiData, _state: combatStateSnapshot }), choiceIndex: -1 },
     ]);
     await db.update(gameSessions)
       .set({ turnCount: session.turnCount + 1, updatedAt: new Date() })
@@ -2271,6 +2343,8 @@ router.post("/:id/combat-action", async (req, res) => {
   } catch (err) {
     req.log.error(err, "Error processing combat action");
     res.status(500).json({ error: "Failed to process combat action" });
+  } finally {
+    inFlightSessions.delete(sessionId);
   }
 });
 

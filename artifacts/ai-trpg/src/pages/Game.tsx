@@ -236,8 +236,9 @@ export default function Game() {
   const [, setLocation] = useLocation();
   const { lang, t } = useLang();
   const bottomRef   = useRef<HTMLDivElement>(null);
-  const beatIdRef   = useRef(0);
-  const clearTimer  = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const beatIdRef    = useRef(0);
+  const clearTimer   = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isMountedRef = useRef(true);
 
   const [beats,          setBeats]         = useState<StoryBeat[]>([]);
   const [isEnded,        setIsEnded]        = useState(false);
@@ -289,6 +290,17 @@ export default function Game() {
   const currentSentences = useMemo(() => currentBeat?.sentences ?? [], [currentBeat]);
   const allRevealed      = revealedCount >= currentSentences.length;
   const isDead           = stats !== null && stats.hp <= 0;
+
+  // Cleanup timers on unmount
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+      if (worldEffectTimer.current) clearTimeout(worldEffectTimer.current);
+      if (expiredItemTimer.current) clearTimeout(expiredItemTimer.current);
+      if (clearTimer.current) clearTimeout(clearTimer.current);
+    };
+  }, []);
 
   const { data: gameData, isLoading } = useQuery({
     queryKey: [`/api/game/${sessionId}`],
@@ -424,9 +436,12 @@ export default function Game() {
         expiredItemTimer.current = setTimeout(() => setExpiredItems([]), 5000);
       }
     },
-    onError: () => {
+    onError: (err: unknown) => {
+      if (!isMountedRef.current) return;
       setPendingChoice(null);
       setDicePhase("idle");
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error("[choice] mutation error:", msg);
     },
   });
 
@@ -548,8 +563,10 @@ export default function Game() {
       setSkipTyping(false);
       if (data.isEnding) setIsEnded(true);
     },
-    onError: () => {
-      // stay in combat panel on error
+    onError: (err: unknown) => {
+      if (!isMountedRef.current) return;
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error("[combat-action] mutation error:", msg);
     },
   });
 
