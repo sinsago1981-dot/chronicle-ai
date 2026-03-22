@@ -388,6 +388,33 @@ Examples:
 
   No relevant past events this turn → worldConsequences: {}, worldConsequenceDesc: ""
 
+═══ OPENING SCENE RULES (CRITICAL — APPLY TO TURN 1 ONLY) ═══
+The opening scene MUST NOT begin in crisis. No enemy in sight, no active combat, no "you are being chased."
+The inciting incident is APPROACHING — but it has not arrived yet. The world breathes before it breaks.
+
+Structure the opening as follows:
+  STEP 1 — Anchor: Place the player in a specific, textured location. What do they see, smell, hear RIGHT NOW?
+  STEP 2 — Mood: Show the world is not quite right. A wrong detail. A silence where there should be sound. A name carved in the wrong stone. Do not explain it.
+  STEP 3 — Implication: Give one clue — overheard, glimpsed, or felt — that hints at the larger threat. The player may not yet understand what it means. This is foreshadowing.
+  STEP 4 — Backstory surface: Let 1-2 details from the player's past bleed naturally into what they NOTICE or how they REACT — not as narrated history, but as reflex or habit.
+  STEP 5 — Choices (CRITICAL): The first 3 choices must NOT be combat or escape. They are:
+    Choice A — Look deeper into something strange or wrong in the immediate environment
+    Choice B — Make contact with or observe a nearby person who may hold information
+    Choice C — Move toward the next location the story will unfold in
+
+FORESHADOWING RULES:
+- Plant exactly 1-2 details in the opening that will become significant later (a symbol, a name, a texture, a sound)
+- They must feel natural — not obviously important
+- These seeds are yours to harvest in Phase 2 or 3 as a revelation or twist
+- When the twist lands, the player should think "it was there from the beginning"
+
+FORBIDDEN in the opening:
+  ✗ An enemy attacking immediately
+  ✗ The player already knowing who the enemy is
+  ✗ Starting mid-chase or mid-battle
+  ✗ Stating the goal directly in narration ("Your mission is to...")
+  ✗ Three consecutive action-type choices in the first turn
+
 ═══ NARRATIVE PHASES (MANDATORY) ═══
 Every story must pass through 4-5 distinct phases before the goal can be achieved:
   Phase 1 — Orientation: Establish the world, stakes, and first obstacle. (Turns 1-4)
@@ -612,6 +639,33 @@ const SYSTEM_PROMPT_KO = `당신은 주사위 기반 스탯 시스템이 있는 
   → worldConsequences: { "reputation": 1, "strength": 1 }, worldConsequenceDesc: "도전자들이 비켜섭니다. 당신의 이름이 힘을 가집니다."
 
   이번 턴에 관련된 과거 사건 없음 → worldConsequences: {}, worldConsequenceDesc: ""
+
+═══ 개막 장면 규칙 (필수 — 1턴에만 적용) ═══
+개막 장면은 절대로 위기로 시작해서는 안 됩니다. 시야에 적이 없고, 전투가 없고, "추격당하고 있다"는 표현이 없어야 합니다.
+발단 사건은 '다가오고 있는' 것이지, 아직 도착하지 않았습니다. 세계가 부서지기 전에 숨을 쉽니다.
+
+개막을 다음 순서로 구성하세요:
+  1단계 — 정박: 플레이어를 구체적이고 질감 있는 장소에 배치하세요. 지금 이 순간 무엇이 보이고, 냄새나고, 들리는가?
+  2단계 — 분위기: 세계가 완전히 정상이 아님을 보여주세요. 틀린 세부 사항. 소리가 있어야 할 곳의 침묵. 엉뚱한 돌에 새겨진 이름. 설명하지 마세요.
+  3단계 — 암시: 더 큰 위협을 암시하는 단서 하나를 제공하세요 — 엿들었거나, 힐긋 봤거나, 느꼈거나. 플레이어는 아직 그 의미를 이해하지 못할 수 있습니다. 이것이 복선입니다.
+  4단계 — 과거 표면화: 플레이어의 과거 중 1~2가지가 그들이 '무엇을 알아채는지' 또는 '어떻게 반응하는지'에 자연스럽게 스며들게 하세요 — 서술된 역사가 아니라 반사적 행동이나 습관으로.
+  5단계 — 선택지 (필수): 첫 번째 선택지 3가지는 전투나 도주가 아니어야 합니다:
+    선택지 A — 주변 환경에서 이상하거나 잘못된 것을 더 깊이 살피기
+    선택지 B — 정보를 가질 수 있는 주변 인물과 접촉하거나 관찰하기
+    선택지 C — 이야기가 전개될 다음 장소로 이동하기
+
+복선 규칙:
+- 개막에 나중에 중요해질 세부 사항 정확히 1~2개를 심으세요 (상징, 이름, 질감, 소리)
+- 자연스럽게 느껴져야 합니다 — 명백히 중요해 보여선 안 됩니다
+- 이 씨앗은 2단계나 3단계에서 폭로나 반전으로 수확하기 위한 것입니다
+- 반전이 찾아왔을 때 플레이어는 "처음부터 거기 있었구나"라고 느껴야 합니다
+
+개막에서 금지:
+  ✗ 즉시 적이 공격하는 장면
+  ✗ 플레이어가 이미 적이 누구인지 알고 있는 상황
+  ✗ 이미 추격 중이거나 전투 중인 장면으로 시작
+  ✗ 서사에서 목표를 직접 언급 ("당신의 임무는 ~입니다")
+  ✗ 첫 번째 턴에 세 개 모두 행동형 선택지
 
 ═══ 서사 단계 (필수) ═══
 목표를 달성하기 전에 모든 이야기는 4~5개의 뚜렷한 단계를 거쳐야 합니다:
@@ -879,8 +933,48 @@ router.post("/start", async (req, res) => {
       : "";
 
     const openingPrompt = lang === "ko"
-      ? `장르 톤: ${genre}\n캐릭터 역할(행동 방식 렌즈, 세계 설정이 아님): ${classStr || "모험가"}\n스탯: HP ${startingStats.hp}/${startingStats.maxHp}, 힘 ${startingStats.strength}, 교활 ${startingStats.cunning}, 의지 ${startingStats.will}, 명성 ${startingStats.reputation}\n스킬: ${skillsInfo}${backstoryBlock}\n\n직업에 얽매이지 말고 완전히 새롭고 독창적인 세계와 시나리오를 창조하세요. 이 직업을 가진 캐릭터가 어울리지 않아 보이는 예상치 못한 배경이면 더욱 좋습니다. 다중 단계가 필요한 복잡하고 구체적인 최종 목표("goal", "goalShort")를 정의하고, 분위기와 긴장감으로 이야기를 시작하세요. 플레이어의 과거가 왜 이 장소에 있는지, 어떻게 여기까지 오게 되었는지를 자연스럽게 설명해 주세요.\n\n첫 번째 선택지 3가지는 반드시 서로 다른 행동 유형이어야 합니다: 하나는 힘/전투, 하나는 은신/기만, 하나는 이동/탐험. 그리고 현재 위치에서 도달 가능한 2~3개의 인접 구역을 암시하세요.`
-      : `Genre tone: ${genre}\nCharacter role (action-style lens, NOT world setting): ${classStr || "Adventurer"}\nStats: HP ${startingStats.hp}/${startingStats.maxHp}, STR ${startingStats.strength}, CUN ${startingStats.cunning}, WIL ${startingStats.will}, REP ${startingStats.reputation}\nSkills: ${skillsInfo}${backstoryBlock}\n\nIgnore any genre assumptions tied to the class. Build a completely original world that this character would have no obvious reason to be in — the unexpected combination is the point. Define a complex, multi-step final goal ("goal", "goalShort") requiring at least 4 distinct phases to achieve. Open with atmosphere and tension. Use the player's backstory to explain HOW and WHY they ended up here — let it surface as memory flashes, habits, and physical detail woven into the prose, not as exposition.\n\nThe first 3 choices MUST be different action types: one Force/Combat, one Stealth/Deception, one Movement/Exploration. Hint at 2-3 adjacent zones the player could reach from the starting location.`;
+      ? `장르 톤: ${genre}
+캐릭터 역할(행동 방식 렌즈, 세계 설정이 아님): ${classStr || "모험가"}
+스탯: HP ${startingStats.hp}/${startingStats.maxHp}, 힘 ${startingStats.strength}, 교활 ${startingStats.cunning}, 의지 ${startingStats.will}, 명성 ${startingStats.reputation}
+스킬: ${skillsInfo}${backstoryBlock}
+
+[세계관 지시]
+직업과 무관하게 완전히 새로운 세계와 시나리오를 창조하세요. 이 직업이 전혀 어울리지 않아 보이는 곳이면 더욱 좋습니다.
+다중 단계가 필요한 복잡한 최종 목표("goal", "goalShort")를 정의하되 — 서사에서 직접 언급하지 마세요.
+
+[개막 지시 — 반드시 준수]
+• 위기나 전투로 시작하지 마세요. 플레이어는 지금 어딘가에 있고, 세계는 아직 고요합니다.
+• 장소를 감각적으로 구체화하세요. 무엇이 보이고 냄새나고 들리는가?
+• 세계 어딘가 뭔가 미세하게 잘못됐음을 보여주세요 — 설명 없이. 복선입니다.
+• 플레이어의 과거가 그들의 행동 방식이나 알아채는 것에 자연스럽게 묻어나게 하세요 (설명 금지).
+• 플레이어가 왜 이 장소에 있게 됐는지를 서사 속 분위기와 암시로 드러내세요.
+
+[첫 선택지 규칙 — 반드시 준수]
+선택지 A: 주변에서 이상하거나 눈에 걸리는 것을 더 자세히 살피기
+선택지 B: 근처 인물에게 접근하거나 조용히 관찰하기
+선택지 C: 이야기가 이어질 다음 장소로 이동하기
+→ 세 선택지 모두 탐색/관찰 중심이어야 합니다. 전투나 도주 금지.`
+      : `Genre tone: ${genre}
+Character role (action-style lens, NOT world setting): ${classStr || "Adventurer"}
+Stats: HP ${startingStats.hp}/${startingStats.maxHp}, STR ${startingStats.strength}, CUN ${startingStats.cunning}, WIL ${startingStats.will}, REP ${startingStats.reputation}
+Skills: ${skillsInfo}${backstoryBlock}
+
+[World-building directive]
+Ignore genre assumptions tied to the class. Build a completely original world — the more unexpected the combination, the better.
+Define a complex multi-step final goal ("goal", "goalShort") — but do NOT state it in the narration itself.
+
+[Opening scene directive — strictly enforced]
+• Do NOT open in crisis, combat, or mid-chase. The player is somewhere. The world is still.
+• Anchor the player in a specific, sensory location: what is seen, smelled, heard right now?
+• Show one thing that is subtly wrong — a detail that doesn't fit, left unexplained. This is your foreshadowing seed.
+• Let 1-2 elements of the player's past surface as reflex, habit, or what they notice — never as stated history.
+• Explain through atmosphere and implication WHY the player is here, not through direct narration.
+
+[First-turn choices — strictly enforced]
+Choice A: Investigate something strange or out of place in the immediate environment
+Choice B: Approach or quietly observe a nearby person who may know something
+Choice C: Move toward the next location where the story will continue
+→ All three must be observation/exploration oriented. No combat, no escape.`;
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4o",
