@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import {
   Loader2, ArrowLeft, BookOpen, Trophy, Skull, Dices, User, Zap, Key, ShoppingBag, ScrollText, ChevronDown, ChevronUp,
 } from "lucide-react";
-import type { StoryResponse, Stats, StatChanges, RollResult, DiceOutcome, Skill, Enemy, EnemyChanges, Item, KeyItemChoice } from "@/types";
+import type { StoryResponse, Stats, StatChanges, RollResult, DiceOutcome, Skill, Enemy, EnemyChanges, Item, KeyItemChoice, SkillChoice } from "@/types";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLang } from "@/lib/i18n";
 import { LangToggle } from "@/components/LangToggle";
@@ -275,6 +275,9 @@ export default function Game() {
   // Key item now-or-never choices
   const [keyItemChoices,        setKeyItemChoices]       = useState<KeyItemChoice[]>([]);
   const [expiredItems,          setExpiredItems]         = useState<string[]>([]);
+
+  // Skill-based narrative choices
+  const [skillChoices,          setSkillChoices]         = useState<SkillChoice[]>([]);
   const expiredItemTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Dice phase
@@ -409,8 +412,9 @@ export default function Game() {
       setSkipTyping(false);
       if (data.isEnding) setIsEnded(true);
 
-      // Key item choices for next turn
+      // Key item choices and skill choices for next turn
       setKeyItemChoices(data.keyItemChoices ?? []);
+      setSkillChoices(data.skillChoices ?? []);
 
       // Show expired key item notification
       if (data.expiredKeyItemNames && data.expiredKeyItemNames.length > 0) {
@@ -860,6 +864,69 @@ export default function Game() {
                           );
                         })}
                       </div>
+
+                      {/* ─── Skill-activated narrative choices ─── */}
+                      {skillChoices.length > 0 && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 6 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="space-y-2 pt-1"
+                        >
+                          <div className="flex items-center gap-2">
+                            <div className="flex-1 h-px bg-violet-500/20" />
+                            <div className="flex items-center gap-1.5">
+                              <Zap className="w-2.5 h-2.5 text-violet-400/70" />
+                              <span className="text-[9px] font-black text-violet-400/70 uppercase tracking-widest">
+                                {lang === "ko" ? "스킬 행동" : "SKILL ACTION"}
+                              </span>
+                            </div>
+                            <div className="flex-1 h-px bg-violet-500/20" />
+                          </div>
+                          {skillChoices.map(sc => {
+                            const skill = skills.find(s => s.id === sc.skillId);
+                            if (!skill) return null;
+                            const bonus = skill.bonusValue;
+                            return (
+                              <Button
+                                key={sc.skillId}
+                                variant="outline"
+                                disabled={choiceMutation.isPending}
+                                className="w-full text-left h-auto py-2.5 px-4 justify-start border-violet-500/40 hover:border-violet-400/70 hover:bg-violet-950/20 transition-all group flex-col items-start gap-1"
+                                style={{ borderStyle: "dashed" }}
+                                onClick={() => {
+                                  setSkillChoices([]);
+                                  selectChoice(activeBeat!.choices.length + keyItemChoices.length, sc.choiceText);
+                                  setSelectedSkillId(sc.skillId);
+                                }}
+                              >
+                                <div className="flex items-center gap-2 w-full">
+                                  <Zap className="w-3 h-3 text-violet-400/70 shrink-0 mt-0.5" />
+                                  <span className="text-sm text-foreground/90">{sc.choiceText}</span>
+                                </div>
+                                <div className="flex items-center gap-1.5 pl-5">
+                                  <span className="text-[10px] font-bold text-violet-400/60 uppercase tracking-wider">
+                                    {lang === "ko" ? skill.nameKo : skill.name}
+                                  </span>
+                                  {bonus > 0 && (
+                                    <>
+                                      <span className="text-[10px] text-violet-400/40">·</span>
+                                      <span className="text-[10px] font-semibold text-violet-300/70">+{bonus} 보너스</span>
+                                    </>
+                                  )}
+                                  {skill.cooldown > 0 && (
+                                    <>
+                                      <span className="text-[10px] text-violet-400/40">·</span>
+                                      <span className="text-[10px] text-violet-400/50">
+                                        {lang === "ko" ? `재사용 ${skill.cooldown}턴` : `${skill.cooldown}t cooldown`}
+                                      </span>
+                                    </>
+                                  )}
+                                </div>
+                              </Button>
+                            );
+                          })}
+                        </motion.div>
+                      )}
 
                       {/* ─── Key item NOW OR NEVER choices (AI-activated) ─── */}
                       {keyItemChoices.length > 0 && (

@@ -135,6 +135,11 @@ export type KeyItemChoice = {
   choiceText: string;
 };
 
+export type SkillChoice = {
+  skillId:    string;
+  choiceText: string;
+};
+
 export type StoryResponse = {
   narration:              string;
   choices:                string[];
@@ -156,5 +161,6 @@ export type StoryResponse = {
   combatResult?:          CombatResult;
   worldEvents?:           string[];
   keyItemChoices?:        KeyItemChoice[];
+  skillChoices?:          SkillChoice[];
   expiredKeyItemNames?:   string[];
 };

@@ -472,6 +472,35 @@ Examine the player's INVENTORY each turn. If any key_item's condition keywords m
 
 If no key item conditions match this scene → "keyItemChoices": []
 
+═══ SKILL CHOICES ═══
+Each turn, the user message lists "AVAILABLE SKILLS (ready to use)". Check them every turn.
+If a skill could enable a UNIQUE narrative action the normal 3 choices cannot offer, add ONE entry to "skillChoices".
+
+Rules:
+- Maximum 1 skill choice per turn
+- The action must feel IMPOSSIBLE without that specific skill (not just "a better version of choice 1")
+- Describe what the skill enables in THIS specific scene — always scene-specific, never generic
+- Never repeat a skill choice from the previous turn unless the scene strongly demands it
+- Do NOT offer a skill choice if all skills are on cooldown (the message will say so)
+- Do NOT offer combat skill choices when already in combat — the combat system handles that
+
+What makes a good skill choice (match these patterns):
+  ✓ Lockpick → bypass a locked gate/vault without triggering the alarm
+  ✓ Battle Cry → shatter enemy morale before combat begins (preventing the fight entirely)
+  ✓ Silver Tongue → extract information the NPC would NEVER share otherwise
+  ✓ Arcane Sight → detect a hidden trap, secret passage, or concealed enemy
+  ✓ Camouflage → vanish and shadow a target undetected through a crowded space
+  ✓ Dark Ritual → reveal forbidden knowledge unavailable through mundane means
+  ✓ Commune with Nature → ask the environment itself for a hidden path or warning
+  ✓ Iron Skin → walk through hazardous terrain (fire, acid, extreme cold) that stops others
+  ✓ Trackmaster → read footprints and signs to identify who passed and where they went
+  ✓ Judgement → strip away a lying NPC's deception and expose their true motive
+  ✗ Do NOT: "attack with your Battle Cry" (that's just combat)
+  ✗ Do NOT: "use your skill to roll better" (meaningless)
+
+"skillChoices" format: [{"skillId": "<exact_id_from_AVAILABLE_SKILLS>", "choiceText": "Vivid, scene-specific description of the unique action this skill enables"}]
+If no skill fits: "skillChoices": []
+
 ALWAYS respond with valid JSON only, no markdown:
 {
   "narration": "...",
@@ -487,6 +516,7 @@ ALWAYS respond with valid JSON only, no markdown:
   "itemsGained": [],
   "worldEvents": [],
   "keyItemChoices": [],
+  "skillChoices": [],
   "goal": "(only in opening response)",
   "goalShort": "(only in opening response)"
 }`;
@@ -664,6 +694,32 @@ const SYSTEM_PROMPT_KO = `당신은 주사위 기반 스탯 시스템이 있는 
 
 이번 장면에 일치하는 핵심 아이템 조건 없음 → "keyItemChoices": []
 
+═══ 스킬 선택지 ═══
+매 턴, 사용자 메시지에 "사용 가능한 스킬 (준비 완료)" 목록이 제공됩니다. 반드시 확인하세요.
+해당 스킬이 기존 3가지 선택지로는 불가능한 고유한 서사적 행동을 가능하게 한다면, "skillChoices"에 항목 1개를 추가하세요.
+
+규칙:
+- 턴당 최대 1개의 스킬 선택지
+- 그 스킬 없이는 불가능한 행동이어야 함 (단순히 선택지 1번의 강화판이 아닌)
+- 현재 장면에 맞는 구체적인 행동을 묘사 — 항상 장면별 맞춤, 일반적 설명 금지
+- 직전 턴과 같은 스킬 선택지 반복 금지 (장면이 강하게 요구하지 않는 한)
+- 모든 스킬이 쿨다운 중이면 스킬 선택지 제공 금지
+- 전투 중에는 스킬 선택지 제공 금지 — 전투 시스템이 담당
+
+좋은 스킬 선택지 예시:
+  ✓ 자물쇠 따기 → 경보 없이 잠긴 문/금고 우회
+  ✓ 전투의 함성 → 전투 시작 전 적의 사기를 완전히 꺾어 싸움을 막음
+  ✓ 은빛 혀 → 절대 공유하지 않을 정보를 NPC에게서 끌어냄
+  ✓ 마법 시야 → 숨겨진 함정, 비밀 통로, 위장한 적 탐지
+  ✓ 위장 → 군중 속을 완전히 은폐된 채로 대상 추적
+  ✓ 어둠의 의식 → 일반적인 방법으로는 접근 불가한 금지된 지식 발굴
+  ✓ 자연과 교감 → 환경 자체에 숨겨진 경로나 위험 정보 요청
+  ✗ 금지: "전투의 함성으로 공격" (그냥 전투임)
+  ✗ 금지: "스킬을 써서 더 잘 굴림" (의미 없음)
+
+"skillChoices" 형식: [{"skillId": "<AVAILABLE_SKILLS의_정확한_id>", "choiceText": "이 스킬이 가능하게 하는 고유 행동의 생생하고 장면별 묘사"}]
+적합한 스킬 없음 → "skillChoices": []
+
 마크다운 없이 유효한 JSON만 응답:
 {
   "narration": "...",
@@ -679,6 +735,7 @@ const SYSTEM_PROMPT_KO = `당신은 주사위 기반 스탯 시스템이 있는 
   "itemsGained": [],
   "worldEvents": [],
   "keyItemChoices": [],
+  "skillChoices": [],
   "goal": "(첫 번째 응답에서만)",
   "goalShort": "(첫 번째 응답에서만)"
 }`;
@@ -961,6 +1018,15 @@ router.post("/:id/choice", async (req, res) => {
     const skillNote = usedSkill
       ? `\nSKILL USED: "${lang === "ko" ? usedSkill.nameKo : usedSkill.name}" — ${lang === "ko" ? usedSkill.descriptionKo : usedSkill.description} (roll modifier +${skillBonus})`
       : "";
+
+    // Available skills (not on cooldown) — sent to AI for skill choice generation
+    const availableSkills = skills.filter(s => s.currentCooldown === 0);
+    const skillsNote = availableSkills.length > 0
+      ? (lang === "ko"
+          ? `\n사용 가능한 스킬 (준비 완료):\n${availableSkills.map(s => `- ${s.id} (${s.nameKo}): ${s.descriptionKo}`).join("\n")}`
+          : `\nAVAILABLE SKILLS (ready to use):\n${availableSkills.map(s => `- ${s.id} (${s.name}): ${s.description}`).join("\n")}`)
+      : (lang === "ko" ? "\n사용 가능한 스킬: 없음 (모두 쿨다운 중)" : "\nAVAILABLE SKILLS: none (all on cooldown)");
+
     const enemyNote = currentEnemy
       ? `\nCURRENT ENEMY: ${currentEnemy.name} (HP ${currentEnemy.hp}/${currentEnemy.maxHp}, ATK ${currentEnemy.attack}, DEF ${currentEnemy.defense})`
       : "";
@@ -976,7 +1042,7 @@ router.post("/:id/choice", async (req, res) => {
       : "";
     const worldMemoryNote = buildWorldMemoryBlock(sessionId, lang);
 
-    const userMsg = `Player chose option ${choiceIndex + 1}: "${choiceText}"${skillNote}${keyItemNote}\n\nDICE ROLL: ${outcomeCtx}\nRolled: d20=${roll.raw}, ${roll.stat.toUpperCase()} modifier=${roll.modifier > 0 ? "+" : ""}${roll.modifier}, Total=${roll.total}${enemyNote}${goalNote}${inventoryNote}${worldMemoryNote}\nPlayer stats: HP ${statsBeforeRoll.hp}/${statsBeforeRoll.maxHp}, STR ${statsBeforeRoll.strength}, CUN ${statsBeforeRoll.cunning}, WIL ${statsBeforeRoll.will}, REP ${statsBeforeRoll.reputation}\nTurn: ${session.turnCount + 1}`;
+    const userMsg = `Player chose option ${choiceIndex + 1}: "${choiceText}"${skillNote}${keyItemNote}\n\nDICE ROLL: ${outcomeCtx}\nRolled: d20=${roll.raw}, ${roll.stat.toUpperCase()} modifier=${roll.modifier > 0 ? "+" : ""}${roll.modifier}, Total=${roll.total}${enemyNote}${goalNote}${inventoryNote}${worldMemoryNote}${skillsNote}\nPlayer stats: HP ${statsBeforeRoll.hp}/${statsBeforeRoll.maxHp}, STR ${statsBeforeRoll.strength}, CUN ${statsBeforeRoll.cunning}, WIL ${statsBeforeRoll.will}, REP ${statsBeforeRoll.reputation}\nTurn: ${session.turnCount + 1}`;
 
     messages.push({ role: "user", content: userMsg });
 
@@ -1011,6 +1077,17 @@ router.post("/:id/choice", async (req, res) => {
     if (newKeyItemChoices.length > 0) {
       pendingKeyItemsMap.set(sessionId, newKeyItemChoices.map(k => k.itemId));
     }
+
+    // Extract skill choices from AI response (validated against player's actual skills)
+    type SkillChoiceRaw = { skillId: string; choiceText: string };
+    const newSkillChoices: SkillChoiceRaw[] = Array.isArray(data.skillChoices)
+      ? data.skillChoices.filter((sc: unknown): sc is SkillChoiceRaw =>
+          typeof sc === "object" && sc !== null &&
+          typeof (sc as SkillChoiceRaw).skillId === "string" &&
+          typeof (sc as SkillChoiceRaw).choiceText === "string" &&
+          skills.some(s => s.id === (sc as SkillChoiceRaw).skillId && s.currentCooldown === 0)
+        ).slice(0, 1)
+      : [];
 
     // Apply AI stat changes to BASE stats (not effective stats)
     newBaseStats = applyStatChanges(newBaseStats, statChanges);
@@ -1106,6 +1183,7 @@ router.post("/:id/choice", async (req, res) => {
       goalAchieved: !!data.goalAchieved,
       worldEvents: worldEventsMap.get(sessionId) ?? [],
       keyItemChoices: newKeyItemChoices,
+      skillChoices: newSkillChoices,
       expiredKeyItemNames,
     });
   } catch (err) {
