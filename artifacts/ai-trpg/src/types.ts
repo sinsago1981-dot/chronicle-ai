@@ -51,16 +51,17 @@ export type Skill = {
 
 // ─── Status effects ────────────────────────────────────────────────────────────
 
-export type StatusEffectId = "stun" | "burn" | "poison" | "bleed" | "decay" | "weakened";
+export type StatusEffectId = "stun" | "burn" | "poison" | "bleed" | "decay" | "weakened" | "torment";
 
 export type StatusEffect = {
   id: StatusEffectId;
   name: string;
   nameKo: string;
-  damagePerTurn: number;  // HP lost per round
-  atkMod: number;         // negative = reduced attack
-  defMod: number;         // negative = reduced defense
-  duration: number;       // rounds remaining
+  damagePerTurn: number;   // flat HP lost per round
+  maxHpPercent?: number;   // % of target's max HP lost per round (e.g. 5 = 5%)
+  atkMod: number;          // negative = reduced attack
+  defMod: number;          // negative = reduced defense
+  duration: number;        // rounds remaining
 };
 
 // ─── Enemy ────────────────────────────────────────────────────────────────────

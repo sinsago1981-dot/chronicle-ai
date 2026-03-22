@@ -180,8 +180,8 @@ const CLASS_SKILLS: Record<string, Skill[]> = {
   ],
   Necromancer: [
     { id: "soul_drain",         skillType: "combat",   name: "Soul Drain",          nameKo: "영혼 흡수",       description: "Siphon life force directly — deal damage and heal yourself for a portion.",                descriptionKo: "생명력을 직접 빨아들인다 — 피해를 주고 그 일부로 자신을 치유.",           statBonus: "will",       bonusValue: 3, hpEffect: 15, cooldown: 4, currentCooldown: 0 },
-    { id: "deaths_embrace",     skillType: "combat",   name: "Death's Embrace",     nameKo: "죽음의 포옹",     description: "Unleash necrotic decay — armor crumbles and flesh rots over time.",                        descriptionKo: "죽음의 부식을 해방 — 갑옷이 무너지고 살이 시간이 지나며 썩는다.",        statBonus: "will",       bonusValue: 0,              cooldown: 3, currentCooldown: 0, statRequirement: { stat: "will",       min: 7 } },
-    { id: "bone_ward",          skillType: "survival", name: "Bone Ward",           nameKo: "뼈 결계",         description: "Raise dead bones as a shield. Absorbs blows while you recover. +12 HP.",                   descriptionKo: "죽은 자의 뼈를 방패로 세운다. 타격을 흡수하며 회복. HP +12.",            statBonus: "will",       bonusValue: 1, hpEffect: 12, cooldown: 3, currentCooldown: 0 },
+    { id: "deaths_embrace",     skillType: "combat",   name: "Death's Embrace",     nameKo: "죽음의 포옹",     description: "Unleash necrotic torment — deals 5% of max HP per turn for 3 turns. Wrecks bosses.",       descriptionKo: "죽음의 고통을 해방 — 3턴간 매 턴 최대체력의 5% 피해. 강적에게 치명적.",  statBonus: "will",       bonusValue: 0,              cooldown: 3, currentCooldown: 0, statRequirement: { stat: "will",       min: 7 } },
+    { id: "bone_ward",          skillType: "survival", name: "Bone Ward",           nameKo: "뼈 결계",         description: "Raise a bone barrier — converts ALL incoming enemy damage into healing for you.",           descriptionKo: "뼈 결계를 세운다 — 적의 모든 공격 피해를 그대로 회복량으로 전환한다.",    statBonus: "will",       bonusValue: 1, hpEffect: 12, cooldown: 3, currentCooldown: 0 },
     { id: "undying",            skillType: "survival", name: "Undying",             nameKo: "불사",            description: "Death has tried. Your body refuses. Rise and recover massively. +22 HP.",                 descriptionKo: "죽음이 시도했다. 당신의 몸은 거부한다. 일어서며 크게 회복. HP +22.",      statBonus: "will",       bonusValue: 2, hpEffect: 22, cooldown: 5, currentCooldown: 0, statRequirement: { stat: "will",       min: 8 } },
     { id: "dark_ritual",        skillType: "utility",  name: "Dark Ritual",         nameKo: "어둠의 의식",     description: "Forbidden rites curse the enemy with decay and weakness simultaneously.",                  descriptionKo: "금기 의식이 적에게 부식과 약화를 동시에 부여한다.",                       statBonus: "cunning",    bonusValue: 0,              cooldown: 3, currentCooldown: 0, statRequirement: { stat: "cunning",    min: 6 } },
     { id: "terrifying_visage",  skillType: "social",   name: "Terrifying Visage",   nameKo: "공포의 외양",     description: "Pure dread stuns the enemy first, then leaves them weakened.",                             descriptionKo: "순수한 공포가 적을 먼저 기절시키고 약화 상태로 남긴다.",                  statBonus: "reputation", bonusValue: 0,              cooldown: 3, currentCooldown: 0, statRequirement: { stat: "reputation", min: 5 } },
@@ -204,7 +204,7 @@ const CLASS_SKILLS: Record<string, Skill[]> = {
   ],
   Ironclad: [
     { id: "iron_bulwark",       skillType: "survival", name: "Iron Bulwark",        nameKo: "철벽",            description: "Iron shield absorbs and reflects damage while healing you. +12 HP.",                      descriptionKo: "철 방패가 피해를 흡수하고 반사하면서 당신을 치유한다. HP +12.",           statBonus: "strength",   bonusValue: 1, hpEffect: 12, cooldown: 3, currentCooldown: 0 },
-    { id: "armor_crush",        skillType: "combat",   name: "Armor Crush",         nameKo: "갑옷 분쇄",       description: "A crushing blow that ignores almost all armor — pure overwhelm.",                          descriptionKo: "거의 모든 갑옷을 무시하는 분쇄 일격 — 순수한 압도.",                     statBonus: "strength",   bonusValue: 0,              cooldown: 4, currentCooldown: 0, statRequirement: { stat: "strength",   min: 7 } },
+    { id: "armor_crush",        skillType: "combat",   name: "Armor Crush",         nameKo: "갑옷 분쇄",       description: "Crushes armor and turns it against the wearer — deals 60% of enemy defense as bonus dmg.", descriptionKo: "갑옷을 분쇄해 역이용 — 적 방어력의 60%를 보너스 피해로 추가 적용한다.",   statBonus: "strength",   bonusValue: 0,              cooldown: 4, currentCooldown: 0, statRequirement: { stat: "strength",   min: 7 } },
     { id: "juggernaut",         skillType: "survival", name: "Juggernaut",          nameKo: "저거넛",          description: "Nothing stops your advance. Endurance beyond human limits. +18 HP.",                      descriptionKo: "아무것도 당신의 전진을 막지 못한다. 인간의 한계를 넘는 지구력. HP +18.",  statBonus: "strength",   bonusValue: 2, hpEffect: 18, cooldown: 4, currentCooldown: 0, statRequirement: { stat: "strength",   min: 8 } },
     { id: "pain_tolerance",     skillType: "survival", name: "Pain Tolerance",      nameKo: "고통 내성",       description: "You've been hit harder. Use the pain and keep moving. +10 HP.",                           descriptionKo: "더 심하게 맞은 적이 있다. 고통을 이용하고 계속 나아간다. HP +10.",       statBonus: "strength",   bonusValue: 1, hpEffect: 10, cooldown: 2, currentCooldown: 0 },
     { id: "combat_sense",       skillType: "utility",  name: "Combat Sense",        nameKo: "전투 감각",       description: "Perfect tactical positioning — avoid retaliation and expose enemy armor weaknesses.",      descriptionKo: "완벽한 전술적 위치 선정 — 반격을 피하고 적의 갑옷 약점을 노출.",         statBonus: "cunning",    bonusValue: 0,              cooldown: 2, currentCooldown: 0, statRequirement: { stat: "cunning",    min: 4 } },
@@ -1383,12 +1383,13 @@ type CombatSfx = { player: StatusEffect[]; enemy: StatusEffect[] };
 const statusEffectsMap = new Map<number, CombatSfx>();
 
 const STATUS_TEMPLATES: Record<StatusEffectId, Omit<StatusEffect, "duration">> = {
-  stun:     { id: "stun",     name: "Stunned",  nameKo: "기절",    damagePerTurn: 0,  atkMod: 0,  defMod: 0  },
-  burn:     { id: "burn",     name: "Burning",  nameKo: "화상",    damagePerTurn: 4,  atkMod: 0,  defMod: 0  },
-  poison:   { id: "poison",   name: "Poisoned", nameKo: "중독",    damagePerTurn: 3,  atkMod: 0,  defMod: 0  },
-  bleed:    { id: "bleed",    name: "Bleeding", nameKo: "출혈",    damagePerTurn: 2,  atkMod: 0,  defMod: 0  },
-  decay:    { id: "decay",    name: "Decaying", nameKo: "부식",    damagePerTurn: 0,  atkMod: -2, defMod: -2 },
-  weakened: { id: "weakened", name: "Weakened", nameKo: "약화",    damagePerTurn: 0,  atkMod: -2, defMod: 0  },
+  stun:     { id: "stun",     name: "Stunned",   nameKo: "기절",    damagePerTurn: 0,  atkMod: 0,  defMod: 0  },
+  burn:     { id: "burn",     name: "Burning",   nameKo: "화상",    damagePerTurn: 4,  atkMod: 0,  defMod: 0  },
+  poison:   { id: "poison",   name: "Poisoned",  nameKo: "중독",    damagePerTurn: 3,  atkMod: 0,  defMod: 0  },
+  bleed:    { id: "bleed",    name: "Bleeding",  nameKo: "출혈",    damagePerTurn: 2,  atkMod: 0,  defMod: 0  },
+  decay:    { id: "decay",    name: "Decaying",  nameKo: "부식",    damagePerTurn: 0,  atkMod: -2, defMod: -2 },
+  weakened: { id: "weakened", name: "Weakened",  nameKo: "약화",    damagePerTurn: 0,  atkMod: -2, defMod: 0  },
+  torment:  { id: "torment",  name: "Tormented", nameKo: "고통",    damagePerTurn: 0,  maxHpPercent: 5, atkMod: 0, defMod: 0 },
 };
 
 function makeStatus(id: StatusEffectId, duration: number): StatusEffect {
@@ -1396,16 +1397,18 @@ function makeStatus(id: StatusEffectId, duration: number): StatusEffect {
 }
 
 type CombatSkillFx = {
-  bonusDamage:     number;
-  selfDamage?:     number;
-  selfHeal?:       number;
-  skipCA?:         boolean;
-  drainRatio?:     number;
-  piercing?:       number;
-  reflect?:        number;                                     // reflects X flat damage back to enemy when they attack
-  enemyDefReduce?: number;                                     // permanently lowers enemy.defense by X
-  statusOnEnemy?:  { id: StatusEffectId; duration: number };
-  statusOnEnemy2?: { id: StatusEffectId; duration: number };   // second simultaneous status on enemy
+  bonusDamage:      number;
+  selfDamage?:      number;
+  selfHeal?:        number;
+  skipCA?:          boolean;
+  drainRatio?:      number;
+  piercing?:        number;
+  reflect?:         number;                                     // reflects X flat damage back to enemy when they attack
+  enemyDefReduce?:  number;                                     // permanently lowers enemy.defense by X
+  defenseScaling?:  number;                                     // bonus damage += floor(enemy.defense * defenseScaling)
+  invertDamage?:    boolean;                                    // enemy attack heals you instead of dealing damage
+  statusOnEnemy?:   { id: StatusEffectId; duration: number };
+  statusOnEnemy2?:  { id: StatusEffectId; duration: number };   // second simultaneous status on enemy
 };
 
 const COMBAT_SKILL_FX: Record<string, CombatSkillFx> = {
@@ -1446,8 +1449,8 @@ const COMBAT_SKILL_FX: Record<string, CombatSkillFx> = {
   hunters_mark:        { bonusDamage: 4,  piercing: 2,  statusOnEnemy: { id: "decay",    duration: 2 } },
   // ── Necromancer ──────────────────────────────────────────────────────────────
   soul_drain:          { bonusDamage: 5,  drainRatio: 0.6 },
-  deaths_embrace:      { bonusDamage: 5,  statusOnEnemy: { id: "decay",    duration: 3 } },
-  bone_ward:           { bonusDamage: 0,  selfHeal: 12, skipCA: true },
+  deaths_embrace:      { bonusDamage: 5,  statusOnEnemy: { id: "torment",  duration: 3 } },
+  bone_ward:           { bonusDamage: 0,  invertDamage: true },
   undying:             { bonusDamage: 0,  selfHeal: 22, skipCA: true },
   dark_ritual:         { bonusDamage: 0,  skipCA: true, statusOnEnemy: { id: "decay",    duration: 2 }, statusOnEnemy2: { id: "weakened", duration: 2 } },
   terrifying_visage:   { bonusDamage: 0,  skipCA: true, statusOnEnemy: { id: "stun",     duration: 1 }, statusOnEnemy2: { id: "weakened", duration: 2 } },
@@ -1467,7 +1470,7 @@ const COMBAT_SKILL_FX: Record<string, CombatSkillFx> = {
   earthen_tongue:      { bonusDamage: 0,  skipCA: true, enemyDefReduce: 2, statusOnEnemy: { id: "weakened", duration: 3 } },
   // ── Ironclad ─────────────────────────────────────────────────────────────────
   iron_bulwark:        { bonusDamage: 0,  selfHeal: 12, skipCA: true, reflect: 7 },
-  armor_crush:         { bonusDamage: 9,  piercing: 6 },
+  armor_crush:         { bonusDamage: 5,  piercing: 6, defenseScaling: 0.6 },
   juggernaut:          { bonusDamage: 2,  selfHeal: 18 },
   pain_tolerance:      { bonusDamage: 0,  selfHeal: 10, skipCA: true },
   combat_sense:        { bonusDamage: 0,  skipCA: true, enemyDefReduce: 4 },
@@ -1555,6 +1558,13 @@ router.post("/:id/combat-action", async (req, res) => {
           ? `☠ ${se.nameKo}: 적에게 ${se.damagePerTurn} 피해.`
           : `☠ ${se.name}: ${se.damagePerTurn} dmg to enemy.`);
       }
+      if (se.maxHpPercent && se.maxHpPercent > 0) {
+        const pctDmg = Math.max(1, Math.round(newEnemy.maxHp * se.maxHpPercent / 100));
+        newEnemy.hp = Math.max(0, newEnemy.hp - pctDmg);
+        combatLog.push(lang === "ko"
+          ? `☠ ${se.nameKo}: 최대체력의 ${se.maxHpPercent}% — 적에게 ${pctDmg} 피해.`
+          : `☠ ${se.name}: ${se.maxHpPercent}% of max HP — ${pctDmg} dmg to enemy.`);
+      }
       if (se.duration - 1 > 0) tickedEnemy.push({ ...se, duration: se.duration - 1 });
     }
     sfx = { ...sfx, enemy: tickedEnemy };
@@ -1588,10 +1598,14 @@ router.post("/:id/combat-action", async (req, res) => {
 
       const fx = COMBAT_SKILL_FX[skillId] ?? { bonusDamage: usedSkill.bonusValue };
 
-      if (fx.bonusDamage > 0) {
+      if (fx.bonusDamage > 0 || fx.defenseScaling) {
         const roll6 = d6();
         const piercing = fx.piercing ?? 0;
         let dmg = newStats.strength + roll6 + fx.bonusDamage - Math.max(0, effEnemyDef - piercing);
+        if (fx.defenseScaling) {
+          const scaledBonus = Math.floor(newEnemy.defense * fx.defenseScaling);
+          dmg += scaledBonus;
+        }
         playerDamage = Math.max(1, dmg);
       }
       if (fx.drainRatio && playerDamage > 0) healAmount += Math.round(playerDamage * fx.drainRatio);
@@ -1695,18 +1709,27 @@ router.post("/:id/combat-action", async (req, res) => {
       } else {
         const roll6 = d6();
         const caDmg = Math.max(1, effEnemyAtk + roll6 - basePlayerDef);
-        damageTaken += caDmg;
-        combatLog.push(lang === "ko"
-          ? `💥 적의 반격: ${caDmg} 피해.`
-          : `💥 Enemy counterattacked: ${caDmg} dmg.`);
-        // ── Reflect: bounce damage back to enemy ───────────────────────
-        const reflectAmt = usedSkill ? (COMBAT_SKILL_FX[usedSkill.id]?.reflect ?? 0) : 0;
-        if (reflectAmt > 0 && newEnemy.hp > 0) {
-          const reflected = Math.min(caDmg, reflectAmt);
-          newEnemy.hp = Math.max(0, newEnemy.hp - reflected);
+        const invertDmg = usedSkill ? (COMBAT_SKILL_FX[usedSkill.id]?.invertDamage ?? false) : false;
+        if (invertDmg) {
+          // ── Invert: enemy attack heals you instead of dealing damage ──
+          healAmount += caDmg;
           combatLog.push(lang === "ko"
-            ? `🔄 ${reflected} 피해 반사!`
-            : `🔄 Reflected ${reflected} damage back!`);
+            ? `🦴 뼈 결계가 적의 ${caDmg} 공격을 흡수해 HP +${caDmg} 회복!`
+            : `🦴 Bone ward absorbs the ${caDmg} attack — healed ${caDmg} HP instead!`);
+        } else {
+          damageTaken += caDmg;
+          combatLog.push(lang === "ko"
+            ? `💥 적의 반격: ${caDmg} 피해.`
+            : `💥 Enemy counterattacked: ${caDmg} dmg.`);
+          // ── Reflect: bounce damage back to enemy ────────────────────
+          const reflectAmt = usedSkill ? (COMBAT_SKILL_FX[usedSkill.id]?.reflect ?? 0) : 0;
+          if (reflectAmt > 0 && newEnemy.hp > 0) {
+            const reflected = Math.min(caDmg, reflectAmt);
+            newEnemy.hp = Math.max(0, newEnemy.hp - reflected);
+            combatLog.push(lang === "ko"
+              ? `🔄 ${reflected} 피해 반사!`
+              : `🔄 Reflected ${reflected} damage back!`);
+          }
         }
       }
     }

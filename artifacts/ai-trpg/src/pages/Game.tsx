@@ -978,14 +978,14 @@ export default function Game() {
                         </motion.div>
                       )}
 
-                      {/* Skills */}
-                      {skills.length > 0 && (
+                      {/* Skills — only visible in combat or when skill choices are available */}
+                      {skills.length > 0 && (inCombat || skillChoices.length > 0) && (
                         <div className="border-t border-border/30 pt-3" onClick={e => e.stopPropagation()}>
                           <SkillsBar
                             skills={skills}
                             selectedSkillId={selectedSkillId}
-                            onSelect={setSelectedSkillId}
-                            disabled={false}
+                            onSelect={inCombat || skillChoices.length > 0 ? setSelectedSkillId : () => {}}
+                            disabled={!inCombat && skillChoices.length === 0}
                           />
                         </div>
                       )}
