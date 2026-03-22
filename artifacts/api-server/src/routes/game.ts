@@ -139,100 +139,100 @@ function mergeItems(existing: Item[], gained: Item[]): Item[] {
 
 const CLASS_SKILLS: Record<string, Skill[]> = {
   Warrior: [
-    { id: "battle_cry",         skillType: "combat",   name: "Battle Cry",          nameKo: "전투의 함성",     description: "A fearsome war cry that channels your battle fury into raw power.",                      descriptionKo: "두려움을 불러일으키는 함성으로 전투 분노를 원초적 힘으로 전환한다.",     statBonus: "strength",   bonusValue: 3,              cooldown: 3, currentCooldown: 0 },
-    { id: "berserker_rage",     skillType: "combat",   name: "Berserker Rage",      nameKo: "광전사의 분노",   description: "Abandon all defense and unleash devastating strikes. Pain fuels your rage.",                descriptionKo: "모든 방어를 포기하고 파괴적인 일격을 가한다. 고통이 분노를 부채질한다.", statBonus: "strength",   bonusValue: 5, hpEffect: -8, cooldown: 3, currentCooldown: 0, statRequirement: { stat: "strength",   min: 7 } },
-    { id: "iron_skin",          skillType: "survival", name: "Iron Skin",           nameKo: "강철 피부",       description: "Harden your body against punishment. You endure what would break others.",                 descriptionKo: "몸을 단련해 징벌을 견뎌낸다. 남들이 부서지는 것을 버텨낸다.",           statBonus: "strength",   bonusValue: 1, hpEffect: 15, cooldown: 3, currentCooldown: 0 },
-    { id: "last_stand",         skillType: "survival", name: "Last Stand",          nameKo: "최후의 저항",     description: "Near death, your will to survive surges. Wounds close. Resolve hardens.",                  descriptionKo: "죽음 직전, 생존 의지가 치솟는다. 상처가 닫히고 의지가 굳어진다.",       statBonus: "will",       bonusValue: 2, hpEffect: 20, cooldown: 4, currentCooldown: 0, statRequirement: { stat: "will",       min: 7 } },
-    { id: "soldier_instinct",   skillType: "utility",  name: "Soldier's Instinct",  nameKo: "병사의 본능",     description: "Battlefield experience sharpens your read of any situation. Danger never catches you off guard.", descriptionKo: "전장 경험이 모든 상황을 읽는 감각을 날카롭게 한다. 위험이 당신을 빈틈에 잡지 못한다.", statBonus: "cunning", bonusValue: 3, cooldown: 2, currentCooldown: 0 },
-    { id: "warlord_presence",   skillType: "social",   name: "Warlord's Presence",  nameKo: "군주의 존재감",   description: "Your reputation as a warrior precedes you. Enemies hesitate. Allies rally.",                 descriptionKo: "전사로서의 명성이 먼저 도착한다. 적은 망설이고 아군은 집결한다.",        statBonus: "reputation", bonusValue: 4,              cooldown: 3, currentCooldown: 0, statRequirement: { stat: "reputation", min: 5 } },
+    { id: "battle_cry",         skillType: "combat",   name: "Battle Cry",          nameKo: "전투의 함성",     description: "A fearsome war cry stuns the enemy and lets you strike unopposed.",                        descriptionKo: "두려운 함성이 적을 기절시키고 반격 없이 공격하게 한다.",                 statBonus: "strength",   bonusValue: 0,              cooldown: 3, currentCooldown: 0 },
+    { id: "berserker_rage",     skillType: "combat",   name: "Berserker Rage",      nameKo: "광전사의 분노",   description: "Reckless, devastating strikes. Massive damage — but pain is the cost.",                     descriptionKo: "무모하고 파괴적인 일격. 막대한 피해 — 대신 자신도 다친다.",              statBonus: "strength",   bonusValue: 0, hpEffect: -8, cooldown: 3, currentCooldown: 0, statRequirement: { stat: "strength",   min: 7 } },
+    { id: "iron_skin",          skillType: "survival", name: "Iron Skin",           nameKo: "강철 피부",       description: "Harden your body against punishment. Heal and avoid retaliation.",                         descriptionKo: "몸을 단련해 징벌을 견뎌낸다. 체력 회복 후 반격을 피한다.",               statBonus: "strength",   bonusValue: 1, hpEffect: 15, cooldown: 3, currentCooldown: 0 },
+    { id: "last_stand",         skillType: "survival", name: "Last Stand",          nameKo: "최후의 저항",     description: "Near death, your will surges. Wounds close. Resolve hardens. +20 HP.",                     descriptionKo: "죽음 직전 의지가 치솟는다. 상처가 닫힌다. HP +20.",                      statBonus: "will",       bonusValue: 2, hpEffect: 20, cooldown: 4, currentCooldown: 0, statRequirement: { stat: "will",       min: 7 } },
+    { id: "soldier_instinct",   skillType: "utility",  name: "Soldier's Instinct",  nameKo: "병사의 본능",     description: "Read the battlefield perfectly — expose weak points, avoid retaliation.",                  descriptionKo: "전장을 완벽하게 읽는다 — 약점을 드러내고 반격을 완전히 피한다.",         statBonus: "cunning",    bonusValue: 0,              cooldown: 2, currentCooldown: 0 },
+    { id: "warlord_presence",   skillType: "social",   name: "Warlord's Presence",  nameKo: "군주의 존재감",   description: "Your presence weakens enemy resolve and reflects their aggression back.",                   descriptionKo: "당신의 존재가 적의 의지를 꺾고 그들의 공격성을 반사시킨다.",              statBonus: "reputation", bonusValue: 0,              cooldown: 3, currentCooldown: 0, statRequirement: { stat: "reputation", min: 5 } },
   ],
   Rogue: [
-    { id: "shadow_strike",      skillType: "combat",   name: "Shadow Strike",       nameKo: "그림자 일격",     description: "Melt into shadow and strike from an unseen angle.",                                        descriptionKo: "그림자 속으로 사라져 보이지 않는 각도에서 공격한다.",                     statBonus: "cunning",    bonusValue: 4,              cooldown: 3, currentCooldown: 0 },
-    { id: "smoke_bomb",         skillType: "combat",   name: "Smoke Bomb",          nameKo: "연막탄",          description: "Throw a smoke bomb to vanish, reposition, and gain a critical edge.",                      descriptionKo: "연막탄을 던져 사라지고, 위치를 바꾸고, 결정적 우위를 점한다.",            statBonus: "cunning",    bonusValue: 3,              cooldown: 2, currentCooldown: 0, statRequirement: { stat: "cunning",    min: 6 } },
-    { id: "vanish",             skillType: "survival", name: "Vanish",              nameKo: "잠적",            description: "Disappear completely. No one finds you unless you wish to be found.",                      descriptionKo: "완전히 사라진다. 원하지 않는 한 아무도 당신을 찾지 못한다.",              statBonus: "cunning",    bonusValue: 2, hpEffect: 8,  cooldown: 3, currentCooldown: 0 },
-    { id: "street_tough",       skillType: "survival", name: "Street Tough",        nameKo: "길거리 강인함",   description: "A lifetime of hard knocks left you wiry and resilient. You take hits others can't.",         descriptionKo: "거친 삶이 강인함을 남겼다. 남들이 못 버티는 타격을 버텨낸다.",            statBonus: "strength",   bonusValue: 2, hpEffect: 12, cooldown: 3, currentCooldown: 0, statRequirement: { stat: "strength",   min: 6 } },
-    { id: "lockpick",           skillType: "utility",  name: "Lockpick",            nameKo: "자물쇠 따기",     description: "No lock, no vault, no sealed door stands between you and what's inside.",                   descriptionKo: "어떤 자물쇠도, 금고도, 잠긴 문도 당신과 안쪽 사이에 없다.",              statBonus: "cunning",    bonusValue: 3,              cooldown: 2, currentCooldown: 0, statRequirement: { stat: "cunning",    min: 7 } },
-    { id: "silver_tongue",      skillType: "social",   name: "Silver Tongue",       nameKo: "은빛 혀",         description: "Half-truths, full charm. You talk your way in or out of anything.",                         descriptionKo: "반쪽 진실, 완전한 매력. 어떤 상황이든 말로 헤쳐나간다.",                  statBonus: "reputation", bonusValue: 3,              cooldown: 3, currentCooldown: 0 },
+    { id: "shadow_strike",      skillType: "combat",   name: "Shadow Strike",       nameKo: "그림자 일격",     description: "Strike from an unseen angle. Heavy damage, causes bleeding, no retaliation.",              descriptionKo: "보이지 않는 각도에서 공격. 큰 피해, 출혈 유발, 반격 없음.",              statBonus: "cunning",    bonusValue: 0,              cooldown: 3, currentCooldown: 0 },
+    { id: "smoke_bomb",         skillType: "combat",   name: "Smoke Bomb",          nameKo: "연막탄",          description: "Poison gas smoke bomb — stuns and poisons the enemy while you vanish.",                   descriptionKo: "독가스 연막탄 — 적을 기절·중독시키며 반격 없이 사라진다.",               statBonus: "cunning",    bonusValue: 0,              cooldown: 2, currentCooldown: 0, statRequirement: { stat: "cunning",    min: 6 } },
+    { id: "vanish",             skillType: "survival", name: "Vanish",              nameKo: "잠적",            description: "Disappear completely. Heals as you escape danger. +8 HP, no retaliation.",               descriptionKo: "완전히 사라진다. 위험에서 벗어나며 치유된다. HP +8, 반격 없음.",         statBonus: "cunning",    bonusValue: 2, hpEffect: 8,  cooldown: 3, currentCooldown: 0 },
+    { id: "street_tough",       skillType: "survival", name: "Street Tough",        nameKo: "길거리 강인함",   description: "A lifetime of hard knocks. Shrug it off and keep fighting. +12 HP.",                       descriptionKo: "거친 삶이 강인함을 남겼다. 툭툭 털고 계속 싸운다. HP +12.",              statBonus: "strength",   bonusValue: 2, hpEffect: 12, cooldown: 3, currentCooldown: 0, statRequirement: { stat: "strength",   min: 6 } },
+    { id: "lockpick",           skillType: "utility",  name: "Lockpick",            nameKo: "자물쇠 따기",     description: "Find and exploit armor gaps. Permanently reduces enemy defense, no retaliation.",          descriptionKo: "적 방어구의 빈틈을 찾아 활용. 방어력을 영구히 감소시키고 반격 없음.",   statBonus: "cunning",    bonusValue: 0,              cooldown: 2, currentCooldown: 0, statRequirement: { stat: "cunning",    min: 7 } },
+    { id: "silver_tongue",      skillType: "social",   name: "Silver Tongue",       nameKo: "은빛 혀",         description: "Talk the enemy into hesitation. Weakens their combat effectiveness for 3 turns.",          descriptionKo: "적을 망설임에 빠뜨린다. 3턴간 전투 효율을 약화시키고 반격 없음.",       statBonus: "reputation", bonusValue: 0,              cooldown: 3, currentCooldown: 0 },
   ],
   Mage: [
-    { id: "arcane_surge",       skillType: "combat",   name: "Arcane Surge",        nameKo: "비전 쇄도",       description: "Channel raw magical energy to amplify the power of your next spell.",                      descriptionKo: "원초적 마법 에너지를 모아 다음 주문의 위력을 증폭시킨다.",               statBonus: "will",       bonusValue: 4,              cooldown: 3, currentCooldown: 0 },
-    { id: "chain_lightning",    skillType: "combat",   name: "Chain Lightning",     nameKo: "연쇄 번개",       description: "Electricity arcs from target to target, punishing clusters of enemies.",                   descriptionKo: "전기가 대상에서 대상으로 튀며 무리 지은 적들을 벌한다.",                  statBonus: "will",       bonusValue: 5,              cooldown: 4, currentCooldown: 0, statRequirement: { stat: "will",       min: 8 } },
-    { id: "mana_shield",        skillType: "survival", name: "Mana Shield",         nameKo: "마나 방어막",     description: "Wrap yourself in arcane energy. It hurts — but it protects.",                              descriptionKo: "비전 에너지로 자신을 감싼다. 아프지만 보호해준다.",                       statBonus: "will",       bonusValue: 2, hpEffect: 10, cooldown: 3, currentCooldown: 0 },
-    { id: "spell_recovery",     skillType: "survival", name: "Spell Recovery",      nameKo: "주문 회복",       description: "Redirect spell energy inward to mend your body and restore focus.",                         descriptionKo: "주문 에너지를 내부로 돌려 몸을 회복하고 집중력을 되찾는다.",               statBonus: "will",       bonusValue: 1, hpEffect: 18, cooldown: 4, currentCooldown: 0, statRequirement: { stat: "will",       min: 9 } },
-    { id: "arcane_sight",       skillType: "utility",  name: "Arcane Sight",        nameKo: "마법 시야",       description: "Perceive magic, intent, and hidden structure others cannot see.",                            descriptionKo: "남들이 볼 수 없는 마법, 의도, 숨겨진 구조를 인식한다.",                    statBonus: "cunning",    bonusValue: 3,              cooldown: 2, currentCooldown: 0, statRequirement: { stat: "cunning",    min: 6 } },
-    { id: "enchanting_words",   skillType: "social",   name: "Enchanting Words",    nameKo: "마혹의 말",       description: "Weave subtle compulsion into conversation. Minds bend without knowing why.",                 descriptionKo: "대화에 은밀한 강요를 엮는다. 마음이 이유도 모르고 굽어진다.",              statBonus: "reputation", bonusValue: 4,              cooldown: 3, currentCooldown: 0, statRequirement: { stat: "reputation", min: 6 } },
+    { id: "arcane_surge",       skillType: "combat",   name: "Arcane Surge",        nameKo: "비전 쇄도",       description: "Raw magical energy as a burning blast. High damage with fire damage over time.",           descriptionKo: "원초적 마법 에너지가 불타는 폭발로. 높은 피해와 지속 화상.",             statBonus: "will",       bonusValue: 0,              cooldown: 3, currentCooldown: 0 },
+    { id: "chain_lightning",    skillType: "combat",   name: "Chain Lightning",     nameKo: "연쇄 번개",       description: "Lightning arcs between targets. Massive damage and stuns the enemy.",                      descriptionKo: "번개가 대상들 사이를 튄다. 막대한 피해와 기절.",                         statBonus: "will",       bonusValue: 0,              cooldown: 4, currentCooldown: 0, statRequirement: { stat: "will",       min: 8 } },
+    { id: "mana_shield",        skillType: "survival", name: "Mana Shield",         nameKo: "마나 방어막",     description: "Arcane energy wraps you. Heals and reflects incoming damage. +10 HP.",                     descriptionKo: "비전 에너지로 자신을 감싼다. 치유하고 피해를 반사한다. HP +10.",          statBonus: "will",       bonusValue: 2, hpEffect: 10, cooldown: 3, currentCooldown: 0 },
+    { id: "spell_recovery",     skillType: "survival", name: "Spell Recovery",      nameKo: "주문 회복",       description: "Redirect spell energy inward. Full focus restoration. +18 HP, no retaliation.",           descriptionKo: "주문 에너지를 내부로 돌린다. 완전 집중 회복. HP +18, 반격 없음.",        statBonus: "will",       bonusValue: 1, hpEffect: 18, cooldown: 4, currentCooldown: 0, statRequirement: { stat: "will",       min: 9 } },
+    { id: "arcane_sight",       skillType: "utility",  name: "Arcane Sight",        nameKo: "마법 시야",       description: "Magically expose structural weaknesses. Reduces enemy armor permanently.",                 descriptionKo: "마법으로 구조적 약점 노출. 반격 없이 적의 방어를 영구히 감소.",           statBonus: "cunning",    bonusValue: 0,              cooldown: 2, currentCooldown: 0, statRequirement: { stat: "cunning",    min: 6 } },
+    { id: "enchanting_words",   skillType: "social",   name: "Enchanting Words",    nameKo: "마혹의 말",       description: "Weave subtle compulsion into combat. Weakens enemy for 3 turns, no retaliation.",          descriptionKo: "은밀한 강요를 전투에 엮는다. 3턴간 적을 약화, 반격 없음.",               statBonus: "reputation", bonusValue: 0,              cooldown: 3, currentCooldown: 0, statRequirement: { stat: "reputation", min: 6 } },
   ],
   Paladin: [
-    { id: "holy_strike",        skillType: "combat",   name: "Holy Strike",         nameKo: "성스러운 일격",   description: "Channel divine light through your weapon for a consecrated blow.",                         descriptionKo: "무기를 통해 신성한 빛을 흘려보내 성결된 일격을 가한다.",                 statBonus: "will",       bonusValue: 4,              cooldown: 3, currentCooldown: 0 },
-    { id: "divine_smite",       skillType: "combat",   name: "Divine Smite",        nameKo: "신성한 강타",     description: "Pour divine wrath into a single devastating blow. Darkness recoils.",                      descriptionKo: "신성한 분노를 단 한 번의 파괴적인 일격에 쏟아붓는다. 어둠이 물러선다.",  statBonus: "will",       bonusValue: 6,              cooldown: 4, currentCooldown: 0, statRequirement: { stat: "will",       min: 8 } },
-    { id: "lay_on_hands",       skillType: "survival", name: "Lay on Hands",        nameKo: "안수",            description: "Channel holy energy to heal your wounds through sheer faith.",                            descriptionKo: "순수한 신앙으로 성스러운 에너지를 모아 상처를 치유한다.",                 statBonus: "will",       bonusValue: 1, hpEffect: 22, cooldown: 4, currentCooldown: 0 },
-    { id: "divine_protection",  skillType: "survival", name: "Divine Protection",   nameKo: "신성한 보호",     description: "A holy ward absorbs the worst of what comes. You stand where others fall.",                 descriptionKo: "신성한 결계가 최악을 흡수한다. 남들이 쓰러지는 곳에서 당신은 서 있다.",  statBonus: "will",       bonusValue: 2, hpEffect: 15, cooldown: 3, currentCooldown: 0, statRequirement: { stat: "will",       min: 9 } },
-    { id: "judgement",          skillType: "utility",  name: "Judgement",           nameKo: "심판",            description: "Your divine authority strips away deception. Truth is laid bare.",                          descriptionKo: "신성한 권위로 기만을 벗겨낸다. 진실이 드러난다.",                         statBonus: "cunning",    bonusValue: 3,              cooldown: 2, currentCooldown: 0, statRequirement: { stat: "strength",   min: 7 } },
-    { id: "blessed_presence",   skillType: "social",   name: "Blessed Presence",    nameKo: "축복받은 존재",   description: "Your faith radiates outward. Those around you feel its pull, whether they want to or not.", descriptionKo: "신앙이 외부로 발산된다. 원하든 원하지 않든 주위 사람들이 그 당김을 느낀다.", statBonus: "reputation", bonusValue: 4, cooldown: 3, currentCooldown: 0 },
+    { id: "holy_strike",        skillType: "combat",   name: "Holy Strike",         nameKo: "성스러운 일격",   description: "Divine light burns through the blow. Heavy damage and ignites holy fire.",                  descriptionKo: "신성한 빛이 일격을 불태운다. 큰 피해와 신성한 화상.",                    statBonus: "will",       bonusValue: 0,              cooldown: 3, currentCooldown: 0 },
+    { id: "divine_smite",       skillType: "combat",   name: "Divine Smite",        nameKo: "신성한 강타",     description: "All divine wrath into one devastating blow. Highest single hit damage.",                   descriptionKo: "모든 신성한 분노를 단 한 번의 파괴적인 일격에. 최강 단일 타격.",          statBonus: "will",       bonusValue: 0,              cooldown: 4, currentCooldown: 0, statRequirement: { stat: "will",       min: 8 } },
+    { id: "lay_on_hands",       skillType: "survival", name: "Lay on Hands",        nameKo: "안수",            description: "Channel holy energy through faith alone. Massive healing. +22 HP.",                       descriptionKo: "순수한 신앙으로 성스러운 에너지를 모아 상처를 치유한다. HP +22.",         statBonus: "will",       bonusValue: 1, hpEffect: 22, cooldown: 4, currentCooldown: 0 },
+    { id: "divine_protection",  skillType: "survival", name: "Divine Protection",   nameKo: "신성한 보호",     description: "Holy ward absorbs and reflects damage. +15 HP, retaliation reflected.",                    descriptionKo: "신성한 결계가 피해를 흡수하고 반사한다. HP +15, 반격 반사.",             statBonus: "will",       bonusValue: 2, hpEffect: 15, cooldown: 3, currentCooldown: 0, statRequirement: { stat: "will",       min: 9 } },
+    { id: "judgement",          skillType: "utility",  name: "Judgement",           nameKo: "심판",            description: "Strip enemy defenses — permanently reduce their armor and weaken their power.",           descriptionKo: "적의 방어를 벗겨낸다 — 갑옷을 영구히 줄이고 전투력을 약화.",            statBonus: "cunning",    bonusValue: 0,              cooldown: 2, currentCooldown: 0, statRequirement: { stat: "strength",   min: 7 } },
+    { id: "blessed_presence",   skillType: "social",   name: "Blessed Presence",    nameKo: "축복받은 존재",   description: "A divine shield absorbs and reflects incoming damage. No retaliation.",                     descriptionKo: "신성한 방패가 들어오는 피해를 흡수하고 반사한다. 반격 없음.",             statBonus: "reputation", bonusValue: 0,              cooldown: 3, currentCooldown: 0 },
   ],
   Ranger: [
-    { id: "precision_shot",     skillType: "combat",   name: "Precision Shot",      nameKo: "정밀 사격",       description: "Take careful aim, reading the wind, the distance, and your prey.",                         descriptionKo: "바람과 거리, 그리고 먹잇감을 읽으며 신중하게 조준한다.",                  statBonus: "cunning",    bonusValue: 4,              cooldown: 3, currentCooldown: 0 },
-    { id: "volley",             skillType: "combat",   name: "Volley",              nameKo: "일제 사격",       description: "Loose a rapid burst of arrows that blankets the area. No one escapes clean.",              descriptionKo: "신속한 화살 연사로 지역을 덮친다. 누구도 깨끗이 빠져나가지 못한다.",    statBonus: "cunning",    bonusValue: 3,              cooldown: 3, currentCooldown: 0, statRequirement: { stat: "cunning",    min: 6 } },
-    { id: "beast_bond",         skillType: "survival", name: "Beast Bond",          nameKo: "야수의 유대",     description: "Attune with the wild — your instincts sharpen to an animal edge.",                         descriptionKo: "야생과 교감한다 — 본능이 동물적 예리함으로 날카로워진다.",              statBonus: "cunning",    bonusValue: 3,              cooldown: 2, currentCooldown: 0 },
-    { id: "camouflage",         skillType: "survival", name: "Camouflage",          nameKo: "위장",            description: "Become one with the terrain. You vanish before they even know you're there.",             descriptionKo: "지형과 하나가 된다. 그들이 당신의 존재를 알기도 전에 사라진다.",          statBonus: "cunning",    bonusValue: 2, hpEffect: 8,  cooldown: 3, currentCooldown: 0, statRequirement: { stat: "cunning",    min: 7 } },
-    { id: "trackmaster",        skillType: "utility",  name: "Trackmaster",         nameKo: "추적 전문가",     description: "Every path, every disturbance, every sign in the wild speaks to you.",                      descriptionKo: "모든 길, 모든 흔적, 야생의 모든 신호가 당신에게 말을 건다.",              statBonus: "cunning",    bonusValue: 3,              cooldown: 2, currentCooldown: 0 },
-    { id: "hunters_mark",       skillType: "social",   name: "Hunter's Mark",       nameKo: "사냥꾼의 낙인",   description: "Mark a target. Everyone knows. Your prey feels eyes wherever they run.",                   descriptionKo: "대상을 낙인찍는다. 모두가 안다. 어디로 도망치든 눈이 느껴진다.",         statBonus: "reputation", bonusValue: 3,              cooldown: 3, currentCooldown: 0, statRequirement: { stat: "reputation", min: 6 } },
+    { id: "precision_shot",     skillType: "combat",   name: "Precision Shot",      nameKo: "정밀 사격",       description: "A carefully aimed shot that pierces armor and causes prolonged bleeding.",                 descriptionKo: "방어구를 관통하고 지속적인 출혈을 유발하는 정밀 조준 사격.",              statBonus: "cunning",    bonusValue: 0,              cooldown: 3, currentCooldown: 0 },
+    { id: "volley",             skillType: "combat",   name: "Volley",              nameKo: "일제 사격",       description: "Rapid arrow burst — solid damage with bleeding on multiple impacts.",                     descriptionKo: "신속한 화살 연사 — 여러 충격으로 피해와 출혈.",                           statBonus: "cunning",    bonusValue: 0,              cooldown: 3, currentCooldown: 0, statRequirement: { stat: "cunning",    min: 6 } },
+    { id: "beast_bond",         skillType: "combat",   name: "Beast Bond",          nameKo: "야수의 유대",     description: "A beast companion flanks the enemy — deal damage without taking retaliation.",            descriptionKo: "야수 동료가 측면을 노린다 — 반격 없이 피해를 가한다.",                   statBonus: "cunning",    bonusValue: 0,              cooldown: 2, currentCooldown: 0 },
+    { id: "camouflage",         skillType: "survival", name: "Camouflage",          nameKo: "위장",            description: "Vanish into terrain, heal wounds in safety. +8 HP, no retaliation.",                      descriptionKo: "지형에 숨어 안전하게 상처를 치유한다. HP +8, 반격 없음.",                 statBonus: "cunning",    bonusValue: 2, hpEffect: 8,  cooldown: 3, currentCooldown: 0, statRequirement: { stat: "cunning",    min: 7 } },
+    { id: "trackmaster",        skillType: "utility",  name: "Trackmaster",         nameKo: "추적 전문가",     description: "Read enemy movement patterns. Avoid retaliation, permanently lower enemy defense.",        descriptionKo: "적의 움직임 패턴을 읽는다. 반격을 피하고 방어를 영구적으로 감소.",        statBonus: "cunning",    bonusValue: 0,              cooldown: 2, currentCooldown: 0 },
+    { id: "hunters_mark",       skillType: "social",   name: "Hunter's Mark",       nameKo: "사냥꾼의 낙인",   description: "Mark the prey — cuts through armor and causes festering decay.",                           descriptionKo: "먹잇감을 낙인찍는다 — 갑옷을 뚫고 부패를 유발한다.",                     statBonus: "reputation", bonusValue: 0,              cooldown: 3, currentCooldown: 0, statRequirement: { stat: "reputation", min: 6 } },
   ],
   Necromancer: [
-    { id: "soul_drain",         skillType: "combat",   name: "Soul Drain",          nameKo: "영혼 흡수",       description: "Siphon life force from your target, healing yourself as you drain them.",                  descriptionKo: "대상에서 생명력을 빨아들여 흡수하면서 자신을 치유한다.",                  statBonus: "will",       bonusValue: 3, hpEffect: 15, cooldown: 4, currentCooldown: 0 },
-    { id: "deaths_embrace",     skillType: "combat",   name: "Death's Embrace",     nameKo: "죽음의 포옹",     description: "Embrace death's power directly — reality bends at your command.",                         descriptionKo: "죽음의 힘을 직접 받아들인다 — 현실이 당신의 명령에 굴복한다.",          statBonus: "will",       bonusValue: 5,              cooldown: 3, currentCooldown: 0, statRequirement: { stat: "will",       min: 7 } },
-    { id: "bone_ward",          skillType: "survival", name: "Bone Ward",           nameKo: "뼈 결계",         description: "Raise fragments of the dead as a shield. Their bones take the blow.",                     descriptionKo: "죽은 자의 파편을 방패로 세운다. 그들의 뼈가 타격을 받아낸다.",            statBonus: "will",       bonusValue: 1, hpEffect: 12, cooldown: 3, currentCooldown: 0 },
-    { id: "undying",            skillType: "survival", name: "Undying",             nameKo: "불사",            description: "Death has tried before. Your body refuses. You rise when others stay down.",              descriptionKo: "죽음이 전에도 시도했다. 당신의 몸은 거부한다. 남들이 쓰러질 때 일어선다.", statBonus: "will",       bonusValue: 2, hpEffect: 22, cooldown: 5, currentCooldown: 0, statRequirement: { stat: "will",       min: 8 } },
-    { id: "dark_ritual",        skillType: "utility",  name: "Dark Ritual",         nameKo: "어둠의 의식",     description: "Perform forbidden rites that unlock truths others dare not seek.",                         descriptionKo: "다른 이들이 감히 찾지 못하는 진실을 여는 금기 의식을 행한다.",            statBonus: "cunning",    bonusValue: 4,              cooldown: 3, currentCooldown: 0, statRequirement: { stat: "cunning",    min: 6 } },
-    { id: "terrifying_visage",  skillType: "social",   name: "Terrifying Visage",   nameKo: "공포의 외양",     description: "Your presence breaks will. Enemies flee or freeze before you speak.",                      descriptionKo: "당신의 존재가 의지를 꺾는다. 말하기도 전에 적들이 도망치거나 굳어진다.",  statBonus: "reputation", bonusValue: 4,              cooldown: 3, currentCooldown: 0, statRequirement: { stat: "reputation", min: 5 } },
+    { id: "soul_drain",         skillType: "combat",   name: "Soul Drain",          nameKo: "영혼 흡수",       description: "Siphon life force directly — deal damage and heal yourself for a portion.",                descriptionKo: "생명력을 직접 빨아들인다 — 피해를 주고 그 일부로 자신을 치유.",           statBonus: "will",       bonusValue: 3, hpEffect: 15, cooldown: 4, currentCooldown: 0 },
+    { id: "deaths_embrace",     skillType: "combat",   name: "Death's Embrace",     nameKo: "죽음의 포옹",     description: "Unleash necrotic decay — armor crumbles and flesh rots over time.",                        descriptionKo: "죽음의 부식을 해방 — 갑옷이 무너지고 살이 시간이 지나며 썩는다.",        statBonus: "will",       bonusValue: 0,              cooldown: 3, currentCooldown: 0, statRequirement: { stat: "will",       min: 7 } },
+    { id: "bone_ward",          skillType: "survival", name: "Bone Ward",           nameKo: "뼈 결계",         description: "Raise dead bones as a shield. Absorbs blows while you recover. +12 HP.",                   descriptionKo: "죽은 자의 뼈를 방패로 세운다. 타격을 흡수하며 회복. HP +12.",            statBonus: "will",       bonusValue: 1, hpEffect: 12, cooldown: 3, currentCooldown: 0 },
+    { id: "undying",            skillType: "survival", name: "Undying",             nameKo: "불사",            description: "Death has tried. Your body refuses. Rise and recover massively. +22 HP.",                 descriptionKo: "죽음이 시도했다. 당신의 몸은 거부한다. 일어서며 크게 회복. HP +22.",      statBonus: "will",       bonusValue: 2, hpEffect: 22, cooldown: 5, currentCooldown: 0, statRequirement: { stat: "will",       min: 8 } },
+    { id: "dark_ritual",        skillType: "utility",  name: "Dark Ritual",         nameKo: "어둠의 의식",     description: "Forbidden rites curse the enemy with decay and weakness simultaneously.",                  descriptionKo: "금기 의식이 적에게 부식과 약화를 동시에 부여한다.",                       statBonus: "cunning",    bonusValue: 0,              cooldown: 3, currentCooldown: 0, statRequirement: { stat: "cunning",    min: 6 } },
+    { id: "terrifying_visage",  skillType: "social",   name: "Terrifying Visage",   nameKo: "공포의 외양",     description: "Pure dread stuns the enemy first, then leaves them weakened.",                             descriptionKo: "순수한 공포가 적을 먼저 기절시키고 약화 상태로 남긴다.",                  statBonus: "reputation", bonusValue: 0,              cooldown: 3, currentCooldown: 0, statRequirement: { stat: "reputation", min: 5 } },
   ],
   Bard: [
-    { id: "dissonant_whisper",  skillType: "combat",   name: "Dissonant Whisper",   nameKo: "불협화음",        description: "A haunting melody that rattles minds and makes your reputation precede you.",             descriptionKo: "마음을 흔드는 선율과 함께 당신의 명성이 앞서 울린다.",                   statBonus: "reputation", bonusValue: 4,              cooldown: 3, currentCooldown: 0 },
-    { id: "blade_song",         skillType: "combat",   name: "Blade Song",          nameKo: "칼날 노래",       description: "Music and steel become one. Every note lands with an edge.",                             descriptionKo: "음악과 강철이 하나가 된다. 모든 음표가 날이 서 있다.",                    statBonus: "strength",   bonusValue: 3,              cooldown: 3, currentCooldown: 0, statRequirement: { stat: "strength",   min: 5 } },
-    { id: "healing_word",       skillType: "survival", name: "Healing Word",        nameKo: "치유의 말",       description: "Speak words of power that mend flesh and soothe pain.",                                  descriptionKo: "살을 치유하고 고통을 달래는 힘의 말을 전한다.",                           statBonus: "reputation", bonusValue: 1, hpEffect: 18, cooldown: 3, currentCooldown: 0 },
-    { id: "countercharm",       skillType: "survival", name: "Countercharm",        nameKo: "반격 매력",       description: "Your performance neutralises fear, charm, and compulsion in those who hear.",             descriptionKo: "당신의 연주가 듣는 이들의 공포, 매혹, 강요를 무력화한다.",                statBonus: "will",       bonusValue: 2, hpEffect: 10, cooldown: 3, currentCooldown: 0, statRequirement: { stat: "will",       min: 6 } },
-    { id: "bardic_knowledge",   skillType: "utility",  name: "Bardic Knowledge",    nameKo: "음유시인의 지식", description: "Your travels filled your head with lore. There's almost nothing you don't know a little about.", descriptionKo: "여행이 머릿속을 지식으로 가득 채웠다. 조금이라도 모르는 것이 거의 없다.", statBonus: "cunning",    bonusValue: 4,              cooldown: 2, currentCooldown: 0, statRequirement: { stat: "cunning",    min: 7 } },
-    { id: "inspire",            skillType: "social",   name: "Inspire",             nameKo: "고무",            description: "Your words lift spirits and turn hesitation into resolve.",                               descriptionKo: "당신의 말이 사기를 높이고 망설임을 결의로 바꾼다.",                        statBonus: "reputation", bonusValue: 5,              cooldown: 4, currentCooldown: 0, statRequirement: { stat: "reputation", min: 6 } },
+    { id: "dissonant_whisper",  skillType: "combat",   name: "Dissonant Whisper",   nameKo: "불협화음",        description: "A haunting melody breaks concentration. Damages, stuns, no retaliation.",                 descriptionKo: "섬뜩한 선율이 집중을 깨뜨린다. 피해, 기절, 반격 없음.",                  statBonus: "reputation", bonusValue: 0,              cooldown: 3, currentCooldown: 0 },
+    { id: "blade_song",         skillType: "combat",   name: "Blade Song",          nameKo: "칼날 노래",       description: "Music and steel in perfect harmony. Damage with prolonged bleeding.",                      descriptionKo: "음악과 강철의 완벽한 조화. 피해와 지속 출혈 유발.",                       statBonus: "strength",   bonusValue: 0,              cooldown: 3, currentCooldown: 0, statRequirement: { stat: "strength",   min: 5 } },
+    { id: "healing_word",       skillType: "survival", name: "Healing Word",        nameKo: "치유의 말",       description: "Words of power mend flesh and soothe pain. +18 HP.",                                      descriptionKo: "힘의 말이 살을 치유하고 고통을 달랜다. HP +18.",                          statBonus: "reputation", bonusValue: 1, hpEffect: 18, cooldown: 3, currentCooldown: 0 },
+    { id: "countercharm",       skillType: "survival", name: "Countercharm",        nameKo: "반격 매력",       description: "Turn charm outward as a shield — heals and reflects incoming damage. +10 HP.",            descriptionKo: "매력을 방어막으로 바꾼다 — 치유하고 들어오는 피해를 반사. HP +10.",       statBonus: "will",       bonusValue: 2, hpEffect: 10, cooldown: 3, currentCooldown: 0, statRequirement: { stat: "will",       min: 6 } },
+    { id: "bardic_knowledge",   skillType: "utility",  name: "Bardic Knowledge",    nameKo: "음유시인의 지식", description: "Encyclopedic knowledge finds every weak point. Avoid retaliation, reduce enemy defense.",  descriptionKo: "방대한 지식이 모든 약점을 찾아낸다. 반격을 피하고 적의 방어를 감소.",    statBonus: "cunning",    bonusValue: 0,              cooldown: 2, currentCooldown: 0, statRequirement: { stat: "cunning",    min: 7 } },
+    { id: "inspire",            skillType: "social",   name: "Inspire",             nameKo: "고무",            description: "Inspired fighting spirit turns incoming damage into reflected force.",                     descriptionKo: "고무된 전투 정신이 들어오는 피해를 반사력으로 바꾼다.",                   statBonus: "reputation", bonusValue: 0,              cooldown: 4, currentCooldown: 0, statRequirement: { stat: "reputation", min: 6 } },
   ],
   Druid: [
-    { id: "natures_wrath",      skillType: "combat",   name: "Nature's Wrath",      nameKo: "자연의 분노",     description: "Unleash the primal fury of the wild upon your enemies.",                                  descriptionKo: "야생의 원초적 분노를 적들에게 해방시킨다.",                               statBonus: "will",       bonusValue: 4,              cooldown: 3, currentCooldown: 0 },
-    { id: "thorn_whip",         skillType: "combat",   name: "Thorn Whip",          nameKo: "가시 채찍",       description: "Living thorns tear into flesh and drag enemies into your reach.",                         descriptionKo: "살아있는 가시가 살을 찢고 적들을 당신의 손닿는 곳으로 끌어당긴다.",      statBonus: "strength",   bonusValue: 3,              cooldown: 2, currentCooldown: 0, statRequirement: { stat: "strength",   min: 5 } },
-    { id: "regrowth",           skillType: "survival", name: "Regrowth",            nameKo: "재생",            description: "Channel natural life force to rapidly regenerate your body.",                             descriptionKo: "자연의 생명력을 모아 몸을 빠르게 재생시킨다.",                            statBonus: "will",       bonusValue: 1, hpEffect: 24, cooldown: 4, currentCooldown: 0 },
-    { id: "wild_form",          skillType: "survival", name: "Wild Form",           nameKo: "야생 형상",       description: "Shift briefly into a beast. Injuries fade. Instincts take over.",                        descriptionKo: "잠시 야수로 변신한다. 부상이 사라진다. 본능이 지배한다.",                  statBonus: "will",       bonusValue: 2, hpEffect: 16, cooldown: 4, currentCooldown: 0, statRequirement: { stat: "will",       min: 8 } },
-    { id: "commune_nature",     skillType: "utility",  name: "Commune with Nature", nameKo: "자연과 교감",     description: "The living world speaks. You listen. Hidden paths, hidden dangers — all revealed.",         descriptionKo: "살아있는 세계가 말한다. 당신이 듣는다. 숨겨진 길, 숨겨진 위험 — 모두 드러난다.", statBonus: "cunning",  bonusValue: 3, cooldown: 2, currentCooldown: 0 },
-    { id: "earthen_tongue",     skillType: "social",   name: "Earthen Tongue",      nameKo: "대지의 언어",     description: "Speak with authority drawn from the land itself. Nature lends your words weight.",         descriptionKo: "대지 자체에서 끌어낸 권위로 말한다. 자연이 당신의 말에 무게를 더한다.",  statBonus: "reputation", bonusValue: 4,              cooldown: 3, currentCooldown: 0, statRequirement: { stat: "reputation", min: 6 } },
+    { id: "natures_wrath",      skillType: "combat",   name: "Nature's Wrath",      nameKo: "자연의 분노",     description: "Primal fury of the wild — damages and poisons the enemy for 3 turns.",                    descriptionKo: "야생의 원초적 분노 — 피해를 주고 3턴간 적을 중독.",                      statBonus: "will",       bonusValue: 0,              cooldown: 3, currentCooldown: 0 },
+    { id: "thorn_whip",         skillType: "combat",   name: "Thorn Whip",          nameKo: "가시 채찍",       description: "Living thorns drag the enemy in — damage, bleeding, and no retaliation.",                 descriptionKo: "살아있는 가시가 적을 끌어당긴다 — 피해, 출혈, 반격 차단.",               statBonus: "strength",   bonusValue: 0,              cooldown: 2, currentCooldown: 0, statRequirement: { stat: "strength",   min: 5 } },
+    { id: "regrowth",           skillType: "survival", name: "Regrowth",            nameKo: "재생",            description: "Channel natural life force to rapidly regenerate. +24 HP.",                               descriptionKo: "자연의 생명력을 모아 몸을 빠르게 재생시킨다. HP +24.",                   statBonus: "will",       bonusValue: 1, hpEffect: 24, cooldown: 4, currentCooldown: 0 },
+    { id: "wild_form",          skillType: "survival", name: "Wild Form",           nameKo: "야생 형상",       description: "Shift into a beast. Injuries fade instantly. +16 HP, no retaliation.",                   descriptionKo: "야수로 변신한다. 부상이 즉시 사라진다. HP +16, 반격 없음.",               statBonus: "will",       bonusValue: 2, hpEffect: 16, cooldown: 4, currentCooldown: 0, statRequirement: { stat: "will",       min: 8 } },
+    { id: "commune_nature",     skillType: "utility",  name: "Commune with Nature", nameKo: "자연과 교감",     description: "Nature reveals weak points. Avoid retaliation, permanently reduce enemy armor.",           descriptionKo: "자연이 약점을 드러낸다. 반격을 피하고 적의 갑옷을 영구 감소.",            statBonus: "cunning",    bonusValue: 0,              cooldown: 2, currentCooldown: 0 },
+    { id: "earthen_tongue",     skillType: "social",   name: "Earthen Tongue",      nameKo: "대지의 언어",     description: "Earth curses shackle the enemy — weakens them and reduces their armor.",                   descriptionKo: "대지의 저주가 적을 속박 — 약화시키고 전투 내내 갑옷을 감소.",             statBonus: "reputation", bonusValue: 0,              cooldown: 3, currentCooldown: 0, statRequirement: { stat: "reputation", min: 6 } },
   ],
   Ironclad: [
-    { id: "iron_bulwark",       skillType: "combat",   name: "Iron Bulwark",        nameKo: "철벽",            description: "Become an immovable wall. Absorb the blow and retaliate with measured force.",            descriptionKo: "움직이지 않는 방벽이 된다. 충격을 흡수하고 절제된 힘으로 반격한다.",    statBonus: "strength",   bonusValue: 3, hpEffect: 12, cooldown: 3, currentCooldown: 0 },
-    { id: "armor_crush",        skillType: "combat",   name: "Armor Crush",         nameKo: "갑옷 분쇄",       description: "A crushing blow that exploits gaps in any defense, however strong.",                      descriptionKo: "어떤 방어구의 틈새든 파고드는 분쇄 일격.",                               statBonus: "strength",   bonusValue: 5,              cooldown: 4, currentCooldown: 0, statRequirement: { stat: "strength",   min: 7 } },
-    { id: "juggernaut",         skillType: "survival", name: "Juggernaut",          nameKo: "저거넛",          description: "Nothing stops your advance. Endurance beyond human limits.",                             descriptionKo: "아무것도 당신의 전진을 막지 못한다. 인간의 한계를 넘는 지구력.",          statBonus: "strength",   bonusValue: 2, hpEffect: 18, cooldown: 4, currentCooldown: 0, statRequirement: { stat: "strength",   min: 8 } },
-    { id: "pain_tolerance",     skillType: "survival", name: "Pain Tolerance",      nameKo: "고통 내성",       description: "You've been hit harder. Pain is information. You use it and move on.",                    descriptionKo: "더 심하게 맞은 적이 있다. 고통은 정보다. 이용하고 계속 나아간다.",       statBonus: "strength",   bonusValue: 1, hpEffect: 10, cooldown: 2, currentCooldown: 0 },
-    { id: "combat_sense",       skillType: "utility",  name: "Combat Sense",        nameKo: "전투 감각",       description: "Your battlefield awareness compensates for raw cunning. Angles unseen, openings found.",   descriptionKo: "전장 인식이 교활함을 보완한다. 보이지 않는 각도, 발견된 빈틈.",           statBonus: "cunning",    bonusValue: 3,              cooldown: 2, currentCooldown: 0, statRequirement: { stat: "cunning",    min: 4 } },
-    { id: "unyielding",         skillType: "social",   name: "Unyielding Stance",   nameKo: "굽히지 않는 자세",description: "You don't negotiate. You don't flinch. That alone changes what people ask of you.",         descriptionKo: "협상하지 않는다. 움찔하지 않는다. 그것만으로 사람들이 당신에게 요구하는 것이 바뀐다.", statBonus: "reputation", bonusValue: 3, cooldown: 3, currentCooldown: 0 },
+    { id: "iron_bulwark",       skillType: "survival", name: "Iron Bulwark",        nameKo: "철벽",            description: "Iron shield absorbs and reflects damage while healing you. +12 HP.",                      descriptionKo: "철 방패가 피해를 흡수하고 반사하면서 당신을 치유한다. HP +12.",           statBonus: "strength",   bonusValue: 1, hpEffect: 12, cooldown: 3, currentCooldown: 0 },
+    { id: "armor_crush",        skillType: "combat",   name: "Armor Crush",         nameKo: "갑옷 분쇄",       description: "A crushing blow that ignores almost all armor — pure overwhelm.",                          descriptionKo: "거의 모든 갑옷을 무시하는 분쇄 일격 — 순수한 압도.",                     statBonus: "strength",   bonusValue: 0,              cooldown: 4, currentCooldown: 0, statRequirement: { stat: "strength",   min: 7 } },
+    { id: "juggernaut",         skillType: "survival", name: "Juggernaut",          nameKo: "저거넛",          description: "Nothing stops your advance. Endurance beyond human limits. +18 HP.",                      descriptionKo: "아무것도 당신의 전진을 막지 못한다. 인간의 한계를 넘는 지구력. HP +18.",  statBonus: "strength",   bonusValue: 2, hpEffect: 18, cooldown: 4, currentCooldown: 0, statRequirement: { stat: "strength",   min: 8 } },
+    { id: "pain_tolerance",     skillType: "survival", name: "Pain Tolerance",      nameKo: "고통 내성",       description: "You've been hit harder. Use the pain and keep moving. +10 HP.",                           descriptionKo: "더 심하게 맞은 적이 있다. 고통을 이용하고 계속 나아간다. HP +10.",       statBonus: "strength",   bonusValue: 1, hpEffect: 10, cooldown: 2, currentCooldown: 0 },
+    { id: "combat_sense",       skillType: "utility",  name: "Combat Sense",        nameKo: "전투 감각",       description: "Perfect tactical positioning — avoid retaliation and expose enemy armor weaknesses.",      descriptionKo: "완벽한 전술적 위치 선정 — 반격을 피하고 적의 갑옷 약점을 노출.",         statBonus: "cunning",    bonusValue: 0,              cooldown: 2, currentCooldown: 0, statRequirement: { stat: "cunning",    min: 4 } },
+    { id: "unyielding",         skillType: "social",   name: "Unyielding Stance",   nameKo: "굽히지 않는 자세",description: "Won't be moved. Blocks retaliation, weakens the enemy, reflects their aggression.",        descriptionKo: "움직이지 않는다. 반격을 막고 적을 약화시키며 공격성을 반사.",             statBonus: "reputation", bonusValue: 0,              cooldown: 3, currentCooldown: 0 },
   ],
   Hexblade: [
-    { id: "cursed_strike",      skillType: "combat",   name: "Cursed Strike",       nameKo: "저주 일격",       description: "The curse flows into your weapon. What you cut does not heal cleanly.",                   descriptionKo: "저주가 무기로 흘러든다. 베인 상처는 깨끗이 낫지 않는다.",               statBonus: "will",       bonusValue: 4,              cooldown: 3, currentCooldown: 0 },
-    { id: "hex_bolt",           skillType: "combat",   name: "Hex Bolt",            nameKo: "저주 볼트",       description: "Launch raw curse energy as a bolt. Distance means nothing to the hex.",                  descriptionKo: "원초적 저주 에너지를 볼트로 발사한다. 저주에게 거리는 의미 없다.",        statBonus: "will",       bonusValue: 5,              cooldown: 3, currentCooldown: 0, statRequirement: { stat: "will",       min: 7 } },
-    { id: "hex_leech",          skillType: "survival", name: "Hex Leech",           nameKo: "저주 흡혈",       description: "Channel the curse outward. Their suffering sustains you.",                                 descriptionKo: "저주를 밖으로 흘려보낸다. 그들의 고통이 당신을 지탱한다.",               statBonus: "will",       bonusValue: 3, hpEffect: 14, cooldown: 4, currentCooldown: 0 },
-    { id: "curse_ward",         skillType: "survival", name: "Curse Ward",          nameKo: "저주 결계",       description: "Turn the curse upon itself. What tried to harm you becomes your armor.",                   descriptionKo: "저주를 자기 자신에게 향하게 한다. 당신을 해치려 했던 것이 갑옷이 된다.", statBonus: "will",       bonusValue: 2, hpEffect: 16, cooldown: 4, currentCooldown: 0, statRequirement: { stat: "will",       min: 8 } },
-    { id: "eldritch_sight",     skillType: "utility",  name: "Eldritch Sight",      nameKo: "이계의 시야",     description: "Peer through the veil. Hidden things become apparent. Lies glow a different colour.",     descriptionKo: "장막을 꿰뚫어본다. 숨겨진 것들이 드러난다. 거짓말이 다른 색으로 빛난다.", statBonus: "cunning",   bonusValue: 4,              cooldown: 2, currentCooldown: 0 },
-    { id: "dread_voice",        skillType: "social",   name: "Dread Voice",         nameKo: "공포의 목소리",   description: "Your words carry an edge of the abyss. People comply because some part of them knows better.", descriptionKo: "당신의 말에 심연의 날이 실린다. 사람들이 따르는 것은 어딘가의 본능이 더 잘 알기 때문이다.", statBonus: "reputation", bonusValue: 4, cooldown: 3, currentCooldown: 0, statRequirement: { stat: "reputation", min: 5 } },
+    { id: "cursed_strike",      skillType: "combat",   name: "Cursed Strike",       nameKo: "저주 일격",       description: "The curse flows into the wound — damage and prevents healing for 4 turns.",               descriptionKo: "저주가 상처에 흘러든다 — 피해를 주고 4턴간 치유를 방해하는 출혈.",       statBonus: "will",       bonusValue: 0,              cooldown: 3, currentCooldown: 0 },
+    { id: "hex_bolt",           skillType: "combat",   name: "Hex Bolt",            nameKo: "저주 볼트",       description: "Launch curse energy as a bolt — heavy damage and decaying armor over time.",               descriptionKo: "저주 에너지를 볼트로 발사 — 큰 피해와 시간이 지나며 부식되는 갑옷.",     statBonus: "will",       bonusValue: 0,              cooldown: 3, currentCooldown: 0, statRequirement: { stat: "will",       min: 7 } },
+    { id: "hex_leech",          skillType: "survival", name: "Hex Leech",           nameKo: "저주 흡혈",       description: "Channel the curse outward. Their suffering heals you. +14 HP via drain.",                  descriptionKo: "저주를 밖으로 흘려보낸다. 그들의 고통이 당신을 치유한다. HP +14 흡혈.",  statBonus: "will",       bonusValue: 3, hpEffect: 14, cooldown: 4, currentCooldown: 0 },
+    { id: "curse_ward",         skillType: "survival", name: "Curse Ward",          nameKo: "저주 결계",       description: "Turn the curse upon itself. Harm becomes armor. +16 HP, no retaliation.",                  descriptionKo: "저주를 자기 자신에게 향하게 한다. 해악이 갑옷이 된다. HP +16, 반격 없음.", statBonus: "will",      bonusValue: 2, hpEffect: 16, cooldown: 4, currentCooldown: 0, statRequirement: { stat: "will",       min: 8 } },
+    { id: "eldritch_sight",     skillType: "utility",  name: "Eldritch Sight",      nameKo: "이계의 시야",     description: "Peer through all defenses — dramatically reduces enemy armor and weakens them.",           descriptionKo: "모든 방어를 꿰뚫어본다 — 적의 갑옷을 크게 감소시키고 약화.",             statBonus: "cunning",    bonusValue: 0,              cooldown: 2, currentCooldown: 0 },
+    { id: "dread_voice",        skillType: "social",   name: "Dread Voice",         nameKo: "공포의 목소리",   description: "Words from the abyss stun first, then leave the enemy weakened.",                          descriptionKo: "심연의 말이 먼저 기절시키고 적을 약화되고 무너진 상태로 남긴다.",         statBonus: "reputation", bonusValue: 0,              cooldown: 3, currentCooldown: 0, statRequirement: { stat: "reputation", min: 5 } },
   ],
   Drifter: [
-    { id: "read_the_room",      skillType: "combat",   name: "Read the Room",       nameKo: "상황 파악",       description: "Scan every exit, every face, every angle. You are never caught unaware.",                 descriptionKo: "모든 출구, 모든 얼굴, 모든 각도를 스캔한다. 절대 방심하지 않는다.",    statBonus: "cunning",    bonusValue: 4,              cooldown: 2, currentCooldown: 0 },
-    { id: "sucker_punch",       skillType: "combat",   name: "Sucker Punch",        nameKo: "기습 펀치",       description: "Strike first. Strike hard. Leave before they recover.",                                   descriptionKo: "먼저 친다. 세게 친다. 회복하기 전에 떠난다.",                            statBonus: "strength",   bonusValue: 4,              cooldown: 3, currentCooldown: 0, statRequirement: { stat: "strength",   min: 5 } },
-    { id: "dead_drop",          skillType: "survival", name: "Dead Drop",           nameKo: "비밀 은신처",     description: "Stash, hide, disappear. You always have a way out and a place to wait.",                  descriptionKo: "숨기고, 감추고, 사라진다. 항상 탈출구와 기다릴 곳이 있다.",              statBonus: "cunning",    bonusValue: 2, hpEffect: 10, cooldown: 3, currentCooldown: 0, statRequirement: { stat: "cunning",    min: 7 } },
-    { id: "ghost_step",         skillType: "survival", name: "Ghost Step",          nameKo: "유령 발걸음",     description: "No sound. No trace. You move through a room and leave nothing behind.",                   descriptionKo: "소리 없이. 흔적 없이. 방을 지나도 아무것도 남기지 않는다.",              statBonus: "cunning",    bonusValue: 2, hpEffect: 8,  cooldown: 2, currentCooldown: 0 },
-    { id: "fast_talk",          skillType: "utility",  name: "Fast Talk",           nameKo: "입담",            description: "Turn enemies into allies with silver words before they realise what happened.",            descriptionKo: "깨닫기 전에 은빛 말로 적을 아군으로 만든다.",                            statBonus: "cunning",    bonusValue: 3,              cooldown: 2, currentCooldown: 0, statRequirement: { stat: "cunning",    min: 6 } },
-    { id: "reputation_game",    skillType: "social",   name: "Reputation Game",     nameKo: "명성 게임",       description: "You know how rumour spreads. You plant what you need and let people talk.",                 descriptionKo: "소문이 어떻게 퍼지는지 안다. 필요한 것을 심어두고 사람들이 떠들게 놔둔다.", statBonus: "reputation", bonusValue: 4, cooldown: 3, currentCooldown: 0 },
+    { id: "read_the_room",      skillType: "utility",  name: "Read the Room",       nameKo: "상황 파악",       description: "Scan every angle. Avoid retaliation and permanently reduce enemy defense.",                descriptionKo: "모든 각도를 스캔. 반격을 피하고 적의 방어를 영구적으로 감소.",            statBonus: "cunning",    bonusValue: 0,              cooldown: 2, currentCooldown: 0 },
+    { id: "sucker_punch",       skillType: "combat",   name: "Sucker Punch",        nameKo: "기습 펀치",       description: "Strike first and hardest. Heavy damage, stuns the enemy, no retaliation.",                descriptionKo: "먼저, 가장 세게. 큰 피해, 기절, 반격 없음.",                              statBonus: "strength",   bonusValue: 0,              cooldown: 3, currentCooldown: 0, statRequirement: { stat: "strength",   min: 5 } },
+    { id: "dead_drop",          skillType: "survival", name: "Dead Drop",           nameKo: "비밀 은신처",     description: "Stash, hide, disappear. Recover in safety. +10 HP, no retaliation.",                      descriptionKo: "숨기고, 감추고, 사라진다. 안전하게 회복. HP +10, 반격 없음.",             statBonus: "cunning",    bonusValue: 2, hpEffect: 10, cooldown: 3, currentCooldown: 0, statRequirement: { stat: "cunning",    min: 7 } },
+    { id: "ghost_step",         skillType: "survival", name: "Ghost Step",          nameKo: "유령 발걸음",     description: "No sound. No trace. Recover and reposition safely. +8 HP, no retaliation.",               descriptionKo: "소리 없이. 흔적 없이. 안전하게 회복하고 위치 변경. HP +8, 반격 없음.",   statBonus: "cunning",    bonusValue: 2, hpEffect: 8,  cooldown: 2, currentCooldown: 0 },
+    { id: "fast_talk",          skillType: "utility",  name: "Fast Talk",           nameKo: "입담",            description: "Words moving faster than fists. Weakens enemy for 3 turns, no retaliation.",             descriptionKo: "주먹보다 빠른 말. 3턴간 적의 전투력 약화, 반격 없음.",                    statBonus: "cunning",    bonusValue: 0,              cooldown: 2, currentCooldown: 0, statRequirement: { stat: "cunning",    min: 6 } },
+    { id: "reputation_game",    skillType: "social",   name: "Reputation Game",     nameKo: "명성 게임",       description: "Your name does the fighting. Weakens the enemy and reflects their aggression.",            descriptionKo: "이름이 싸운다. 적을 약화시키고 공격성을 반사.",                            statBonus: "reputation", bonusValue: 0,              cooldown: 3, currentCooldown: 0 },
   ],
   Alchemist: [
-    { id: "flashbomb",          skillType: "combat",   name: "Flash Bomb",          nameKo: "섬광탄",          description: "A blinding explosion of chemical light. Enemies stumble in the aftermath.",               descriptionKo: "화학적 빛의 폭발. 적들이 여파 속에 비틀거린다.",                         statBonus: "cunning",    bonusValue: 3,              cooldown: 3, currentCooldown: 0 },
-    { id: "acid_splash",        skillType: "combat",   name: "Acid Splash",         nameKo: "산성 스플래시",   description: "Hurl corrosive compound. Armor dissolves. Flesh follows.",                                 descriptionKo: "부식성 화합물을 던진다. 갑옷이 녹는다. 살이 뒤따른다.",                   statBonus: "cunning",    bonusValue: 5,              cooldown: 3, currentCooldown: 0, statRequirement: { stat: "cunning",    min: 8 } },
-    { id: "vitalizing_draught", skillType: "survival", name: "Vitalizing Draught",  nameKo: "활력 물약",       description: "A brew of accelerated healing that knits wounds faster than they open.",                  descriptionKo: "상처가 벌어지는 속도보다 빠르게 아무는 가속 치유 물약.",                statBonus: "cunning",    bonusValue: 1, hpEffect: 20, cooldown: 3, currentCooldown: 0 },
-    { id: "toxin_ward",         skillType: "survival", name: "Toxin Ward",          nameKo: "독소 결계",       description: "Inoculate yourself. Poisons, venoms, and infections find no purchase.",                   descriptionKo: "자신을 예방 접종한다. 독, 독액, 감염이 발판을 찾지 못한다.",              statBonus: "will",       bonusValue: 2, hpEffect: 12, cooldown: 3, currentCooldown: 0 },
-    { id: "master_brewer",      skillType: "utility",  name: "Master Brewer",       nameKo: "마스터 브루어",   description: "Your knowledge of compounds unlocks possibilities others call impossible.",               descriptionKo: "화합물에 대한 지식이 남들이 불가능하다고 부르는 가능성을 열어준다.",      statBonus: "cunning",    bonusValue: 4,              cooldown: 2, currentCooldown: 0, statRequirement: { stat: "cunning",    min: 9 } },
-    { id: "merchants_charm",    skillType: "social",   name: "Merchant's Charm",    nameKo: "상인의 매력",     description: "You know what people want and how to make them think you have it.",                        descriptionKo: "사람들이 원하는 것과 당신이 그것을 갖고 있다고 생각하게 하는 방법을 안다.", statBonus: "reputation", bonusValue: 4, cooldown: 3, currentCooldown: 0, statRequirement: { stat: "reputation", min: 6 } },
+    { id: "flashbomb",          skillType: "combat",   name: "Flash Bomb",          nameKo: "섬광탄",          description: "A blinding chemical flash — stuns for 2 turns and prevents retaliation.",                 descriptionKo: "눈멀게 하는 화학적 섬광 — 2턴 기절, 반격 방지.",                         statBonus: "cunning",    bonusValue: 0,              cooldown: 3, currentCooldown: 0 },
+    { id: "acid_splash",        skillType: "combat",   name: "Acid Splash",         nameKo: "산성 스플래시",   description: "Corrosive acid melts armor and causes decay. Heavy damage, permanent defense loss.",       descriptionKo: "부식성 산이 갑옷을 녹이고 부패를 유발. 큰 피해와 방어력 영구 감소.",     statBonus: "cunning",    bonusValue: 0,              cooldown: 3, currentCooldown: 0, statRequirement: { stat: "cunning",    min: 8 } },
+    { id: "vitalizing_draught", skillType: "survival", name: "Vitalizing Draught",  nameKo: "활력 물약",       description: "Accelerated healing brew that knits wounds faster than they open. +20 HP.",              descriptionKo: "상처가 벌어지는 속도보다 빠르게 아무는 가속 치유 물약. HP +20.",         statBonus: "cunning",    bonusValue: 1, hpEffect: 20, cooldown: 3, currentCooldown: 0 },
+    { id: "toxin_ward",         skillType: "survival", name: "Toxin Ward",          nameKo: "독소 결계",       description: "Inoculate yourself against all toxins. Heal and resist. +12 HP.",                        descriptionKo: "자신을 독소로부터 예방 접종한다. 치유하고 저항한다. HP +12.",             statBonus: "will",       bonusValue: 2, hpEffect: 12, cooldown: 3, currentCooldown: 0 },
+    { id: "master_brewer",      skillType: "utility",  name: "Master Brewer",       nameKo: "마스터 브루어",   description: "Compounds reveal structural weaknesses. Avoid retaliation, reduce enemy armor.",          descriptionKo: "화합물이 구조적 약점을 드러낸다. 반격을 피하고 적의 갑옷을 감소.",       statBonus: "cunning",    bonusValue: 0,              cooldown: 2, currentCooldown: 0, statRequirement: { stat: "cunning",    min: 9 } },
+    { id: "merchants_charm",    skillType: "social",   name: "Merchant's Charm",    nameKo: "상인의 매력",     description: "Master negotiation tactics. Weaken enemy for 3 turns, no retaliation.",                   descriptionKo: "마스터 협상 전술. 3턴간 적을 약화, 반격 없음.",                           statBonus: "reputation", bonusValue: 0,              cooldown: 3, currentCooldown: 0, statRequirement: { stat: "reputation", min: 6 } },
   ],
 };
 
@@ -1396,100 +1396,103 @@ function makeStatus(id: StatusEffectId, duration: number): StatusEffect {
 }
 
 type CombatSkillFx = {
-  bonusDamage:   number;
-  selfDamage?:   number;
-  selfHeal?:     number;
-  skipCA?:       boolean;
-  drainRatio?:   number;
-  piercing?:     number;
-  statusOnEnemy?: { id: StatusEffectId; duration: number };
+  bonusDamage:     number;
+  selfDamage?:     number;
+  selfHeal?:       number;
+  skipCA?:         boolean;
+  drainRatio?:     number;
+  piercing?:       number;
+  reflect?:        number;                                     // reflects X flat damage back to enemy when they attack
+  enemyDefReduce?: number;                                     // permanently lowers enemy.defense by X
+  statusOnEnemy?:  { id: StatusEffectId; duration: number };
+  statusOnEnemy2?: { id: StatusEffectId; duration: number };   // second simultaneous status on enemy
 };
 
 const COMBAT_SKILL_FX: Record<string, CombatSkillFx> = {
-  // Warrior
-  battle_cry:          { bonusDamage: 4 },
-  berserker_rage:      { bonusDamage: 9, selfDamage: 5 },
-  iron_skin:           { bonusDamage: 0, selfHeal: 15, skipCA: true },
-  last_stand:          { bonusDamage: 0, selfHeal: 20, skipCA: true },
-  soldier_instinct:    { bonusDamage: 2, skipCA: true },
-  warlord_presence:    { bonusDamage: 0, statusOnEnemy: { id: "weakened", duration: 2 } },
-  // Rogue
-  shadow_strike:       { bonusDamage: 6, skipCA: true, statusOnEnemy: { id: "stun",     duration: 1 } },
-  smoke_bomb:          { bonusDamage: 0, skipCA: true },
-  vanish:              { bonusDamage: 0, selfHeal: 8, skipCA: true },
-  street_tough:        { bonusDamage: 3, selfHeal: 12 },
-  lockpick:            { bonusDamage: 0, skipCA: true },
-  silver_tongue:       { bonusDamage: 0, statusOnEnemy: { id: "weakened", duration: 2 } },
-  // Mage
-  arcane_surge:        { bonusDamage: 7, statusOnEnemy: { id: "burn",     duration: 2 } },
-  chain_lightning:     { bonusDamage: 9, statusOnEnemy: { id: "stun",     duration: 1 } },
-  mana_shield:         { bonusDamage: 0, selfHeal: 10, skipCA: true },
-  spell_recovery:      { bonusDamage: 0, selfHeal: 18, skipCA: true },
-  arcane_sight:        { bonusDamage: 0, skipCA: true },
-  enchanting_words:    { bonusDamage: 0, statusOnEnemy: { id: "weakened", duration: 3 } },
-  // Paladin
-  holy_strike:         { bonusDamage: 6 },
-  divine_smite:        { bonusDamage: 10 },
-  lay_on_hands:        { bonusDamage: 0, selfHeal: 22 },
-  divine_protection:   { bonusDamage: 0, selfHeal: 15, skipCA: true },
-  judgement:           { bonusDamage: 4, statusOnEnemy: { id: "weakened", duration: 2 } },
-  blessed_presence:    { bonusDamage: 0, skipCA: true },
-  // Ranger
-  precision_shot:      { bonusDamage: 4, piercing: 3, statusOnEnemy: { id: "bleed",    duration: 3 } },
-  volley:              { bonusDamage: 6, statusOnEnemy: { id: "bleed",    duration: 2 } },
-  beast_bond:          { bonusDamage: 5 },
-  camouflage:          { bonusDamage: 0, selfHeal: 8, skipCA: true },
-  trackmaster:         { bonusDamage: 0, skipCA: true },
-  hunters_mark:        { bonusDamage: 3, piercing: 2 },
-  // Necromancer
-  soul_drain:          { bonusDamage: 5, drainRatio: 0.5 },
-  deaths_embrace:      { bonusDamage: 4, statusOnEnemy: { id: "decay",    duration: 3 } },
-  bone_ward:           { bonusDamage: 0, selfHeal: 12, skipCA: true },
-  undying:             { bonusDamage: 0, selfHeal: 22, skipCA: true },
-  dark_ritual:         { bonusDamage: 0, statusOnEnemy: { id: "decay",    duration: 2 } },
-  terrifying_visage:   { bonusDamage: 0, skipCA: true, statusOnEnemy: { id: "weakened", duration: 2 } },
-  // Bard
-  dissonant_whisper:   { bonusDamage: 3, skipCA: true, statusOnEnemy: { id: "weakened", duration: 2 } },
-  blade_song:          { bonusDamage: 5, statusOnEnemy: { id: "stun",     duration: 1 } },
-  healing_word:        { bonusDamage: 0, selfHeal: 18 },
-  countercharm:        { bonusDamage: 0, selfHeal: 10, skipCA: true },
-  bardic_knowledge:    { bonusDamage: 0, skipCA: true },
-  inspire:             { bonusDamage: 0, selfHeal: 5 },
-  // Druid
-  natures_wrath:       { bonusDamage: 6, statusOnEnemy: { id: "poison",   duration: 3 } },
-  thorn_whip:          { bonusDamage: 5, statusOnEnemy: { id: "bleed",    duration: 2 } },
-  regrowth:            { bonusDamage: 0, selfHeal: 24 },
-  wild_form:           { bonusDamage: 0, selfHeal: 16, skipCA: true },
-  commune_nature:      { bonusDamage: 0, skipCA: true },
-  earthen_tongue:      { bonusDamage: 0, statusOnEnemy: { id: "weakened", duration: 2 } },
-  // Ironclad
-  iron_bulwark:        { bonusDamage: 3, selfHeal: 12 },
-  armor_crush:         { bonusDamage: 8, piercing: 5 },
-  juggernaut:          { bonusDamage: 4, selfHeal: 18 },
-  pain_tolerance:      { bonusDamage: 0, selfHeal: 10, skipCA: true },
-  combat_sense:        { bonusDamage: 2, skipCA: true },
-  unyielding:          { bonusDamage: 0, skipCA: true, statusOnEnemy: { id: "weakened", duration: 2 } },
-  // Hexblade
-  cursed_strike:       { bonusDamage: 5, statusOnEnemy: { id: "bleed",    duration: 4 } },
-  hex_bolt:            { bonusDamage: 8, statusOnEnemy: { id: "decay",    duration: 2 } },
-  hex_leech:           { bonusDamage: 5, drainRatio: 0.55 },
-  curse_ward:          { bonusDamage: 0, selfHeal: 16, skipCA: true },
-  eldritch_sight:      { bonusDamage: 0, skipCA: true },
-  dread_voice:         { bonusDamage: 0, skipCA: true, statusOnEnemy: { id: "weakened", duration: 3 } },
-  // Drifter
-  read_the_room:       { bonusDamage: 0, skipCA: true },
-  sucker_punch:        { bonusDamage: 6, skipCA: true, statusOnEnemy: { id: "stun",     duration: 1 } },
-  dead_drop:           { bonusDamage: 0, selfHeal: 10, skipCA: true },
-  ghost_step:          { bonusDamage: 0, selfHeal: 8, skipCA: true },
-  fast_talk:           { bonusDamage: 0, skipCA: true },
-  reputation_game:     { bonusDamage: 0, statusOnEnemy: { id: "weakened", duration: 2 } },
-  // Alchemist
-  flashbomb:           { bonusDamage: 3, skipCA: true, statusOnEnemy: { id: "stun",     duration: 1 } },
-  acid_splash:         { bonusDamage: 7, statusOnEnemy: { id: "decay",    duration: 3 } },
-  vitalizing_draught:  { bonusDamage: 0, selfHeal: 20 },
-  toxin_ward:          { bonusDamage: 0, selfHeal: 12, skipCA: true },
-  master_brewer:       { bonusDamage: 0, skipCA: true },
-  merchants_charm:     { bonusDamage: 0, statusOnEnemy: { id: "weakened", duration: 2 } },
+  // ── Warrior ──────────────────────────────────────────────────────────────────
+  battle_cry:          { bonusDamage: 3, skipCA: true,  statusOnEnemy: { id: "stun",     duration: 1 } },
+  berserker_rage:      { bonusDamage: 12, selfDamage: 8 },
+  iron_skin:           { bonusDamage: 0,  selfHeal: 15, skipCA: true },
+  last_stand:          { bonusDamage: 0,  selfHeal: 20, skipCA: true },
+  soldier_instinct:    { bonusDamage: 0,  skipCA: true, enemyDefReduce: 3 },
+  warlord_presence:    { bonusDamage: 0,  skipCA: true, statusOnEnemy: { id: "weakened", duration: 3 }, reflect: 4 },
+  // ── Rogue ────────────────────────────────────────────────────────────────────
+  shadow_strike:       { bonusDamage: 7,  skipCA: true, statusOnEnemy: { id: "bleed",    duration: 3 } },
+  smoke_bomb:          { bonusDamage: 0,  skipCA: true, statusOnEnemy: { id: "stun",     duration: 2 }, statusOnEnemy2: { id: "poison", duration: 2 } },
+  vanish:              { bonusDamage: 0,  selfHeal: 8,  skipCA: true },
+  street_tough:        { bonusDamage: 0,  selfHeal: 12 },
+  lockpick:            { bonusDamage: 0,  skipCA: true, enemyDefReduce: 5 },
+  silver_tongue:       { bonusDamage: 0,  skipCA: true, statusOnEnemy: { id: "weakened", duration: 3 } },
+  // ── Mage ─────────────────────────────────────────────────────────────────────
+  arcane_surge:        { bonusDamage: 8,  statusOnEnemy: { id: "burn",     duration: 2 } },
+  chain_lightning:     { bonusDamage: 10, statusOnEnemy: { id: "stun",     duration: 1 } },
+  mana_shield:         { bonusDamage: 0,  selfHeal: 10, skipCA: true, reflect: 5 },
+  spell_recovery:      { bonusDamage: 0,  selfHeal: 18, skipCA: true },
+  arcane_sight:        { bonusDamage: 0,  skipCA: true, enemyDefReduce: 4 },
+  enchanting_words:    { bonusDamage: 0,  skipCA: true, statusOnEnemy: { id: "weakened", duration: 3 } },
+  // ── Paladin ──────────────────────────────────────────────────────────────────
+  holy_strike:         { bonusDamage: 7,  statusOnEnemy: { id: "burn",     duration: 2 } },
+  divine_smite:        { bonusDamage: 13 },
+  lay_on_hands:        { bonusDamage: 0,  selfHeal: 22 },
+  divine_protection:   { bonusDamage: 0,  selfHeal: 15, skipCA: true, reflect: 6 },
+  judgement:           { bonusDamage: 4,  enemyDefReduce: 3, statusOnEnemy: { id: "weakened", duration: 2 } },
+  blessed_presence:    { bonusDamage: 0,  skipCA: true, reflect: 8 },
+  // ── Ranger ───────────────────────────────────────────────────────────────────
+  precision_shot:      { bonusDamage: 5,  piercing: 4,  statusOnEnemy: { id: "bleed",    duration: 3 } },
+  volley:              { bonusDamage: 7,  statusOnEnemy: { id: "bleed",    duration: 2 } },
+  beast_bond:          { bonusDamage: 5,  skipCA: true },
+  camouflage:          { bonusDamage: 0,  selfHeal: 8,  skipCA: true },
+  trackmaster:         { bonusDamage: 0,  skipCA: true, enemyDefReduce: 4 },
+  hunters_mark:        { bonusDamage: 4,  piercing: 2,  statusOnEnemy: { id: "decay",    duration: 2 } },
+  // ── Necromancer ──────────────────────────────────────────────────────────────
+  soul_drain:          { bonusDamage: 5,  drainRatio: 0.6 },
+  deaths_embrace:      { bonusDamage: 5,  statusOnEnemy: { id: "decay",    duration: 3 } },
+  bone_ward:           { bonusDamage: 0,  selfHeal: 12, skipCA: true },
+  undying:             { bonusDamage: 0,  selfHeal: 22, skipCA: true },
+  dark_ritual:         { bonusDamage: 0,  skipCA: true, statusOnEnemy: { id: "decay",    duration: 2 }, statusOnEnemy2: { id: "weakened", duration: 2 } },
+  terrifying_visage:   { bonusDamage: 0,  skipCA: true, statusOnEnemy: { id: "stun",     duration: 1 }, statusOnEnemy2: { id: "weakened", duration: 2 } },
+  // ── Bard ─────────────────────────────────────────────────────────────────────
+  dissonant_whisper:   { bonusDamage: 4,  skipCA: true, statusOnEnemy: { id: "stun",     duration: 1 } },
+  blade_song:          { bonusDamage: 6,  statusOnEnemy: { id: "bleed",    duration: 2 } },
+  healing_word:        { bonusDamage: 0,  selfHeal: 18 },
+  countercharm:        { bonusDamage: 0,  selfHeal: 10, skipCA: true, reflect: 5 },
+  bardic_knowledge:    { bonusDamage: 0,  skipCA: true, enemyDefReduce: 3 },
+  inspire:             { bonusDamage: 0,  selfHeal: 5,  reflect: 4 },
+  // ── Druid ────────────────────────────────────────────────────────────────────
+  natures_wrath:       { bonusDamage: 6,  statusOnEnemy: { id: "poison",   duration: 3 } },
+  thorn_whip:          { bonusDamage: 5,  skipCA: true, statusOnEnemy: { id: "bleed",    duration: 2 } },
+  regrowth:            { bonusDamage: 0,  selfHeal: 24 },
+  wild_form:           { bonusDamage: 0,  selfHeal: 16, skipCA: true },
+  commune_nature:      { bonusDamage: 0,  skipCA: true, enemyDefReduce: 3 },
+  earthen_tongue:      { bonusDamage: 0,  skipCA: true, enemyDefReduce: 2, statusOnEnemy: { id: "weakened", duration: 3 } },
+  // ── Ironclad ─────────────────────────────────────────────────────────────────
+  iron_bulwark:        { bonusDamage: 0,  selfHeal: 12, skipCA: true, reflect: 7 },
+  armor_crush:         { bonusDamage: 9,  piercing: 6 },
+  juggernaut:          { bonusDamage: 2,  selfHeal: 18 },
+  pain_tolerance:      { bonusDamage: 0,  selfHeal: 10, skipCA: true },
+  combat_sense:        { bonusDamage: 0,  skipCA: true, enemyDefReduce: 4 },
+  unyielding:          { bonusDamage: 0,  skipCA: true, statusOnEnemy: { id: "weakened", duration: 2 }, reflect: 5 },
+  // ── Hexblade ─────────────────────────────────────────────────────────────────
+  cursed_strike:       { bonusDamage: 5,  statusOnEnemy: { id: "bleed",    duration: 4 } },
+  hex_bolt:            { bonusDamage: 8,  statusOnEnemy: { id: "decay",    duration: 2 } },
+  hex_leech:           { bonusDamage: 4,  drainRatio: 0.7 },
+  curse_ward:          { bonusDamage: 0,  selfHeal: 16, skipCA: true },
+  eldritch_sight:      { bonusDamage: 0,  skipCA: true, enemyDefReduce: 5, statusOnEnemy: { id: "weakened", duration: 1 } },
+  dread_voice:         { bonusDamage: 0,  skipCA: true, statusOnEnemy: { id: "stun",     duration: 1 }, statusOnEnemy2: { id: "weakened", duration: 2 } },
+  // ── Drifter ──────────────────────────────────────────────────────────────────
+  read_the_room:       { bonusDamage: 0,  skipCA: true, enemyDefReduce: 3 },
+  sucker_punch:        { bonusDamage: 7,  skipCA: true, statusOnEnemy: { id: "stun",     duration: 1 } },
+  dead_drop:           { bonusDamage: 0,  selfHeal: 10, skipCA: true },
+  ghost_step:          { bonusDamage: 0,  selfHeal: 8,  skipCA: true },
+  fast_talk:           { bonusDamage: 0,  skipCA: true, statusOnEnemy: { id: "weakened", duration: 3 } },
+  reputation_game:     { bonusDamage: 0,  skipCA: true, statusOnEnemy: { id: "weakened", duration: 2 }, reflect: 4 },
+  // ── Alchemist ────────────────────────────────────────────────────────────────
+  flashbomb:           { bonusDamage: 2,  skipCA: true, statusOnEnemy: { id: "stun",     duration: 2 } },
+  acid_splash:         { bonusDamage: 7,  enemyDefReduce: 3, statusOnEnemy: { id: "decay",    duration: 3 } },
+  vitalizing_draught:  { bonusDamage: 0,  selfHeal: 20 },
+  toxin_ward:          { bonusDamage: 0,  selfHeal: 12, skipCA: true },
+  master_brewer:       { bonusDamage: 0,  skipCA: true, enemyDefReduce: 2 },
+  merchants_charm:     { bonusDamage: 0,  skipCA: true, statusOnEnemy: { id: "weakened", duration: 3 } },
 };
 
 function d6(): number { return Math.floor(Math.random() * 6) + 1; }
@@ -1602,10 +1605,33 @@ router.post("/:id/combat-action", async (req, res) => {
 
       skills = skills.map(s => s.id === skillId ? { ...s, currentCooldown: s.cooldown } : s);
 
+      // Apply second status effect to enemy (immediately to sfx.enemy so it shows up)
+      if (fx.statusOnEnemy2 && newEnemy.hp > 0) {
+        const s2 = makeStatus(fx.statusOnEnemy2.id, fx.statusOnEnemy2.duration);
+        const idx2 = sfx.enemy.findIndex(se => se.id === s2.id);
+        if (idx2 >= 0) sfx.enemy[idx2] = { ...s2 };
+        else sfx.enemy = [...sfx.enemy, s2];
+      }
+
+      // Permanently reduce enemy defense
+      if (fx.enemyDefReduce && newEnemy.hp > 0) {
+        newEnemy.defense = Math.max(0, newEnemy.defense - fx.enemyDefReduce);
+      }
+
       const skillLabel = lang === "ko" ? usedSkill.nameKo : usedSkill.name;
-      combatLog.push(lang === "ko"
-        ? `✨ ${skillLabel} 사용!${playerDamage > 0 ? ` 적에게 ${playerDamage} 피해.` : ""}${fx.selfDamage ? ` 자기 피해 ${fx.selfDamage}.` : ""}${healAmount > 0 ? ` HP +${healAmount}.` : ""}${statusOnEnemy ? ` [${statusOnEnemy.nameKo}] 부여.` : ""}${skipCA ? " 반격 회피!" : ""}`
-        : `✨ Used ${skillLabel}!${playerDamage > 0 ? ` Dealt ${playerDamage} dmg.` : ""}${fx.selfDamage ? ` Self: -${fx.selfDamage} HP.` : ""}${healAmount > 0 ? ` Healed ${healAmount} HP.` : ""}${statusOnEnemy ? ` Applied [${statusOnEnemy.name}].` : ""}${skipCA ? " Avoids retaliation!" : ""}`);
+      const logParts: string[] = [];
+      if (playerDamage > 0) logParts.push(lang === "ko" ? `적에게 ${playerDamage} 피해.` : `Dealt ${playerDamage} dmg.`);
+      if (fx.selfDamage)    logParts.push(lang === "ko" ? `자기 피해 ${fx.selfDamage}.` : `Self: -${fx.selfDamage} HP.`);
+      if (healAmount > 0)   logParts.push(lang === "ko" ? `HP +${healAmount}.` : `Healed ${healAmount} HP.`);
+      if (statusOnEnemy)    logParts.push(lang === "ko" ? `[${statusOnEnemy.nameKo}] 부여.` : `Applied [${statusOnEnemy.name}].`);
+      if (fx.statusOnEnemy2 && newEnemy.hp > 0) {
+        const s2 = makeStatus(fx.statusOnEnemy2.id, fx.statusOnEnemy2.duration);
+        logParts.push(lang === "ko" ? `[${s2.nameKo}] 부여.` : `Applied [${s2.name}].`);
+      }
+      if (fx.enemyDefReduce && newEnemy.hp > 0) logParts.push(lang === "ko" ? `적 방어력 -${fx.enemyDefReduce}.` : `Enemy DEF -${fx.enemyDefReduce}.`);
+      if (fx.reflect)       logParts.push(lang === "ko" ? `반사 준비 ${fx.reflect}.` : `Reflect ${fx.reflect} ready.`);
+      if (skipCA)           logParts.push(lang === "ko" ? "반격 회피!" : "Avoids retaliation!");
+      combatLog.push(`✨ ${lang === "ko" ? usedSkill.nameKo : usedSkill.name} ${lang === "ko" ? "사용!" : "used!"} ${logParts.join(" ")}`.trim());
 
     } else if (action === "item") {
       const itemIdx = inventory.findIndex(i => i.id === itemId && i.type === "consumable" && i.quantity > 0);
@@ -1668,10 +1694,31 @@ router.post("/:id/combat-action", async (req, res) => {
         combatLog.push(lang === "ko" ? "😵 적이 기절! 반격 불가." : "😵 Enemy stunned — no counterattack!");
       } else {
         const roll6 = d6();
-        damageTaken += Math.max(1, effEnemyAtk + roll6 - basePlayerDef);
+        const caDmg = Math.max(1, effEnemyAtk + roll6 - basePlayerDef);
+        damageTaken += caDmg;
         combatLog.push(lang === "ko"
-          ? `💥 적의 반격: ${damageTaken} 피해.`
-          : `💥 Enemy counterattacked: ${damageTaken} dmg.`);
+          ? `💥 적의 반격: ${caDmg} 피해.`
+          : `💥 Enemy counterattacked: ${caDmg} dmg.`);
+        // ── Reflect: bounce damage back to enemy ───────────────────────
+        const reflectAmt = usedSkill ? (COMBAT_SKILL_FX[usedSkill.id]?.reflect ?? 0) : 0;
+        if (reflectAmt > 0 && newEnemy.hp > 0) {
+          const reflected = Math.min(caDmg, reflectAmt);
+          newEnemy.hp = Math.max(0, newEnemy.hp - reflected);
+          combatLog.push(lang === "ko"
+            ? `🔄 ${reflected} 피해 반사!`
+            : `🔄 Reflected ${reflected} damage back!`);
+        }
+      }
+    }
+
+    // ── Reflect aura (skipCA skills): aura damage even when enemy can't attack ─
+    if (usedSkill && skipCA && !fled && newEnemy.hp > 0) {
+      const auraReflect = COMBAT_SKILL_FX[usedSkill.id]?.reflect ?? 0;
+      if (auraReflect > 0) {
+        newEnemy.hp = Math.max(0, newEnemy.hp - auraReflect);
+        combatLog.push(lang === "ko"
+          ? `🔄 방어 기운이 적에게 ${auraReflect} 피해!`
+          : `🔄 Defensive aura deals ${auraReflect} damage!`);
       }
     }
 
