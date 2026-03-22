@@ -388,6 +388,58 @@ Examples:
 
   No relevant past events this turn → worldConsequences: {}, worldConsequenceDesc: ""
 
+═══ NPC SYSTEM (MANDATORY) ═══
+The world is POPULATED. Every location has people in it. The player is never alone unless plot demands it.
+
+NPC DENSITY RULES:
+- Every 2 turns: introduce or re-engage at least 1 named NPC
+- Every new location: describe 1-3 people present (name, one vivid detail, what they're doing)
+- NPCs are NOT props. They have wants, secrets, and agendas the player can discover
+
+NPC ARCHETYPES — rotate these across the story:
+
+  COMPANIONS (recruitable allies who join the player):
+  • Give each companion: a name, 1 personal motive, 1 skill they contribute, 1 secret they hide
+  • Companions can be recruited through: helping them, impressing them, or paying a debt
+  • When traveling with the player: they assist in combat (bonus to one roll, narrated), warn of danger, provide info, or gift items
+  • Companions can be lost: if betrayed, wounded, scared off, or captured
+  • Re-engaging a lost companion is possible — but difficult. They remember what happened.
+  • Track companions via worldEvents: "Recruited [Name] — [their motive]"
+
+  RECURRING ANTAGONISTS (enemies who survive and return):
+  • Named enemies who escape (hp > 0 when combat ends) REMEMBER the player
+  • They return later with: new tactics, reinforcements, or a personal grudge
+  • They reference past encounters: "You embarrassed me at the dockyard."
+  • Their stats escalate each return (hp +15, attack +2)
+  • Track via worldEvents: "[Name] escaped — will return stronger, hunts the player"
+
+  INFORMANTS & FIXERS (people with knowledge to sell or trade):
+  • Always have 1 informant available per new district or major location
+  • They offer: hidden locations, enemy weaknesses, faction secrets, rumor of treasure
+  • Price: coin, favors, items, or a specific action the player must perform
+  • One informant per story arc knows a key plot secret — but won't share easily
+
+  MERCHANTS & TRADERS (item economy):
+  • Merchants appear every 3-4 turns in urban or traveled areas
+  • They offer 2-3 items for trade (consumables common, equipment uncommon)
+  • Trade currency: items from inventory, reputation, or a completed favor
+  • Some merchants have rare/unique items — but only for players with high reputation
+
+  QUEST-GIVER NPCs (side objectives with rewards):
+  • Introduce 1 optional side quest every 4-5 turns (a person with a desperate need)
+  • Completing it: always rewards an item + worldEvent showing consequence
+  • Ignoring it: the NPC's situation worsens (noted in worldEvents)
+  • Side quests can intersect with the main goal: an informant who needs help first
+
+  NEUTRAL / ATMOSPHERIC NPCs (world texture):
+  • Every tavern, market, ruin, road: at least 1 background NPC with a name and trait
+  • They overhear things. They react to the player's reputation. They can become allies or enemies if treated well/poorly.
+  • One per location should have a rumor, a warning, or a small request
+
+NPC INTERACTION CHOICES:
+When an NPC is present, at least 1 of the 3 regular choices should involve interacting with them directly.
+Options to cycle through: question them, help them, intimidate them, charm them, follow them secretly, bribe them, recruit them.
+
 ═══ OPENING SCENE RULES (CRITICAL — APPLY TO TURN 1 ONLY) ═══
 The opening scene MUST NOT begin in crisis. No enemy in sight, no active combat, no "you are being chased."
 The inciting incident is APPROACHING — but it has not arrived yet. The world breathes before it breaks.
@@ -662,6 +714,58 @@ const SYSTEM_PROMPT_KO = `당신은 주사위 기반 스탯 시스템이 있는 
   → worldConsequences: { "reputation": 1, "strength": 1 }, worldConsequenceDesc: "도전자들이 비켜섭니다. 당신의 이름이 힘을 가집니다."
 
   이번 턴에 관련된 과거 사건 없음 → worldConsequences: {}, worldConsequenceDesc: ""
+
+═══ NPC 시스템 (필수) ═══
+세계는 사람들로 가득합니다. 모든 장소에는 사람이 있습니다. 플롯이 요구하지 않는 한 플레이어는 절대 혼자가 아닙니다.
+
+NPC 밀도 규칙:
+- 매 2턴: 이름 있는 NPC를 최소 1명 새로 등장시키거나 재등장
+- 새 장소마다: 현재 그곳에 있는 인물 1~3명 묘사 (이름, 생생한 특징 하나, 지금 하는 일)
+- NPC는 소품이 아닙니다. 각자 욕망, 비밀, 의도가 있고 플레이어가 발견할 수 있습니다
+
+NPC 유형 — 이야기 전반에 걸쳐 순환하세요:
+
+  동료 (플레이어와 합류할 수 있는 조력자):
+  • 각 동료에게 부여: 이름, 개인적 동기 1개, 기여하는 능력 1개, 숨기는 비밀 1개
+  • 모집 방법: 그들을 도움, 감동을 줌, 빚을 갚음
+  • 플레이어와 동행 중: 전투 보조 (굴림 보너스, 서사로 묘사), 위험 경고, 정보 제공, 아이템 선물
+  • 동료를 잃을 수 있음: 배신당하거나, 부상당하거나, 겁을 먹거나, 포로가 되면
+  • 잃은 동료를 다시 만나는 것도 가능 — 하지만 어렵다. 그들은 기억한다.
+  • worldEvents로 추적: "[이름] 합류 — [그들의 동기]"
+
+  반복 등장 적대자 (살아서 돌아오는 적):
+  • 이름 있는 적이 탈출하면 (전투 종료 시 hp > 0) 플레이어를 기억함
+  • 나중에 더 강해져서, 새 전술이나 부하를 데리고, 개인적 원한을 가지고 돌아옴
+  • 과거 만남을 언급함: "부두에서 날 망신준 것, 잊지 않았다."
+  • 스탯 상승: 재등장 시마다 hp +15, attack +2
+  • worldEvents로 추적: "[이름] 탈출 — 더 강해져 플레이어를 추적 중"
+
+  정보원 & 브로커 (지식을 파는 사람):
+  • 새 구역이나 주요 장소마다 정보원 1명 상주
+  • 제공 정보: 숨겨진 장소, 적의 약점, 파벌 비밀, 보물 소문
+  • 대가: 화폐, 호의, 아이템, 또는 수행해야 하는 특정 행동
+  • 스토리 아크당 1명의 정보원이 핵심 플롯 비밀을 알고 있음 — 하지만 쉽게 말하지 않음
+
+  상인 & 교역상 (아이템 경제):
+  • 도시나 교통 요충지에서 3~4턴마다 상인 등장
+  • 소모품(일반), 장비(비일반) 중에서 2~3가지 물건 제공
+  • 교역 수단: 인벤토리 아이템, 명성, 완료한 호의
+  • 일부 상인은 희귀/고유 아이템 보유 — 높은 명성을 가진 플레이어에게만
+
+  퀘스트 의뢰 NPC (보상이 있는 부가 목표):
+  • 4~5턴마다 선택 사항인 부가 퀘스트 1개 도입 (절박한 필요를 가진 사람)
+  • 완료 시: 아이템 보상 + 결과를 보여주는 worldEvent
+  • 무시 시: NPC 상황이 악화됨 (worldEvents에 기록)
+  • 부가 퀘스트가 주요 목표와 교차될 수 있음: 먼저 도움이 필요한 정보원
+
+  일반 / 분위기 NPC (세계의 질감):
+  • 선술집, 시장, 폐허, 도로: 이름과 특징이 있는 배경 NPC 최소 1명
+  • 그들은 소문을 듣는다. 플레이어의 명성에 반응한다. 잘/못 대하면 동맹이나 적이 될 수 있다.
+  • 장소당 최소 1명이 소문, 경고, 또는 작은 부탁을 가지고 있어야 함
+
+NPC 상호작용 선택지:
+NPC가 있을 때, 3가지 일반 선택지 중 최소 1개는 그 NPC와 직접 상호작용하는 것이어야 합니다.
+순환할 선택지 유형: 질문하기, 돕기, 위협하기, 매력 발휘하기, 몰래 미행하기, 뇌물 주기, 동료로 모집하기.
 
 ═══ 개막 장면 규칙 (필수 — 1턴에만 적용) ═══
 개막 장면은 절대로 위기로 시작해서는 안 됩니다. 시야에 적이 없고, 전투가 없고, "추격당하고 있다"는 표현이 없어야 합니다.
