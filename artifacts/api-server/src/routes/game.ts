@@ -440,6 +440,47 @@ NPC INTERACTION CHOICES:
 When an NPC is present, at least 1 of the 3 regular choices should involve interacting with them directly.
 Options to cycle through: question them, help them, intimidate them, charm them, follow them secretly, bribe them, recruit them.
 
+═══ NPC ATTITUDE SYSTEM (MANDATORY) ═══
+Every NPC's starting attitude is shaped by THREE inputs. Read them EVERY TURN from the user message.
+
+INPUT 1 — REPUTATION TIER (from "REP X" in Player stats):
+  REP 1-2  → UNKNOWN / SUSPICIOUS: Guards question you on sight. Merchants charge extra or refuse service.
+             Strangers avoid eye contact. Hostility is the default in any confrontation.
+  REP 3-4  → NEUTRAL: No doors open automatically, no doors slam shut. NPCs engage but stay guarded.
+             Merchants deal normally. Minor NPCs can be swayed with effort.
+  REP 5-6  → KNOWN / RESPECTED: Minor faction members recognize your name. Merchants offer better prices.
+             Informants approach you first. Quest-givers seek you out rather than waiting.
+  REP 7-8  → FAMOUS / FEARED: Your arrival changes the room. Guards step aside or become hostile instantly.
+             Rivals pre-emptively prepare for you. Allies feel safer walking beside you.
+             Rumors about you precede your arrival — sometimes inaccurate but always vivid.
+  REP 9-10 → LEGENDARY: NPCs have heard stories that may not even be true. Some are paralyzed with awe or terror.
+             Faction leaders send envoys rather than ignoring you. Your name can end a standoff.
+
+REPUTATION MUST VISIBLY SHAPE THE SCENE:
+- High REP: a guard captain waves you through, a merchant leans in conspiratorially, a terrified informant preemptively volunteers info
+- Low REP: shopkeeper hides valuables, guard demands proof of identity, NPC lies or withholds
+- Mid REP: NPC is politely cautious — open to persuasion but not freely helpful
+- Never narrate the same attitude for every NPC regardless of REP
+
+INPUT 2 — SOCIAL SKILLS (from "AVAILABLE SKILLS" in user message):
+Check if the player has any social/utility skill in their list. If yes:
+  Silver Tongue / Persuasion → NPC senses the player's gift for words — becomes slightly more open, even wary
+  Intimidation / Menace → NPC senses a threat behind the calm — deference or hostility depending on personality
+  Bardic Presence / Performance → NPC is drawn in by charisma — more likely to share, to follow, to trust
+  Dark Ritual / Necromantic aura → Most NPCs feel unease. Some fear-worship. A few are drawn to it.
+  Combat mastery (shown by STR) → Mercenaries, guards, and warriors size the player up with respect or challenge
+When a social skill is USED in this turn: the NPC's reaction should dramatically shift — they reveal more, back down, or offer something they otherwise wouldn't.
+
+INPUT 3 — WORLD MEMORY (from WORLD MEMORY block in user message):
+Every NPC in a region should react to relevant world events that occurred nearby:
+  • If player killed someone in this town: witnesses are tense, officials are alert
+  • If player helped a faction here: their members treat the player as an insider
+  • If player burned, destroyed, or exposed something: citizens reference it in dialogue
+  • If player has a named companion (from worldEvents): that companion is present, contributes, and has opinions
+  • If a named antagonist is hunting the player: people may have been warned, intimidated, or bribed to report on you
+NPCs do NOT need to know everything — but they react to the emotional climate of their community.
+A merchant in a scared town is nervous. A guard in a grateful town is deferential. A bystander in a betrayed city is suspicious of everyone.
+
 ═══ OPENING SCENE RULES (CRITICAL — APPLY TO TURN 1 ONLY) ═══
 The opening scene MUST NOT begin in crisis. No enemy in sight, no active combat, no "you are being chased."
 The inciting incident is APPROACHING — but it has not arrived yet. The world breathes before it breaks.
@@ -766,6 +807,47 @@ NPC 유형 — 이야기 전반에 걸쳐 순환하세요:
 NPC 상호작용 선택지:
 NPC가 있을 때, 3가지 일반 선택지 중 최소 1개는 그 NPC와 직접 상호작용하는 것이어야 합니다.
 순환할 선택지 유형: 질문하기, 돕기, 위협하기, 매력 발휘하기, 몰래 미행하기, 뇌물 주기, 동료로 모집하기.
+
+═══ NPC 태도 시스템 (필수) ═══
+모든 NPC의 초기 태도는 세 가지 입력으로 결정됩니다. 매 턴 사용자 메시지에서 반드시 읽으세요.
+
+입력 1 — 명성 단계 (플레이어 스탯의 "REP X"에서):
+  REP 1-2  → 무명 / 의심: 경비가 보는 즉시 심문. 상인이 추가 요금을 청구하거나 거래를 거부.
+             낯선 이들이 눈 마주침을 피함. 대립 상황에서 적대감이 기본값.
+  REP 3-4  → 중립: 문이 저절로 열리지도, 닫히지도 않음. NPC가 경계를 유지하며 상대.
+             상인은 정상적으로 거래. 소소한 NPC는 노력하면 설득 가능.
+  REP 5-6  → 알려짐 / 존경: 소파벌 구성원이 이름을 알아봄. 상인이 더 좋은 가격 제공.
+             정보원이 먼저 접근. 의뢰인이 기다리는 대신 찾아옴.
+  REP 7-8  → 유명 / 두려움: 등장하면 분위기가 바뀜. 경비가 비켜서거나 즉각 적대적.
+             라이벌이 미리 대비함. 동료들이 당신 옆에 있으면 더 안전하다고 느낌.
+             소문이 도착보다 먼저 퍼짐 — 때로 부정확하지만 항상 생생함.
+  REP 9-10 → 전설: NPC들이 사실이 아닐 수도 있는 이야기를 들어봤음. 경외감이나 공포로 굳음.
+             파벌 지도자가 무시하는 대신 사절을 보냄. 이름 하나로 교착 상태가 끝남.
+
+명성은 반드시 장면에 가시적으로 적용되어야 합니다:
+- 높은 명성: 경비대장이 손짓으로 통과시킴, 상인이 음모적으로 속삭임, 겁먹은 정보원이 자발적으로 정보 제공
+- 낮은 명성: 상점주인이 귀중품을 숨김, 경비가 신분증 요구, NPC가 거짓말하거나 정보 숨김
+- 중간 명성: NPC가 정중하게 조심스러움 — 설득에 열려있지만 자유롭게 도움 주진 않음
+- 명성과 무관하게 모든 NPC에게 동일한 태도를 서술하는 것 금지
+
+입력 2 — 사회 스킬 (사용자 메시지의 "사용 가능한 스킬"에서):
+플레이어의 스킬 목록에 사회/실용 스킬이 있는지 확인. 있다면:
+  은빛 혀 / 설득 → NPC가 플레이어의 말재주를 감지 — 약간 더 개방적, 때로 경계
+  위협 / 공포 → NPC가 침착함 뒤의 위협을 감지 — 성격에 따라 복종 또는 적대
+  음유시인 기운 / 퍼포먼스 → NPC가 카리스마에 끌림 — 공유하고, 따르고, 신뢰할 가능성 높음
+  어둠의 의식 / 사령술 분위기 → 대부분 불안감. 일부는 두려움으로 숭배. 소수는 끌림.
+  전투 숙련 (STR에서 보임) → 용병, 경비, 전사들이 존경이나 도전으로 플레이어를 가늠
+이번 턴에 사회 스킬을 사용했다면: NPC 반응이 극적으로 변해야 함 — 더 많이 드러내거나, 물러서거나, 평소엔 주지 않을 것을 제공.
+
+입력 3 — 세계 기억 (사용자 메시지의 세계 기록 블록에서):
+해당 지역의 모든 NPC는 근처에서 발생한 관련 세계 사건에 반응해야 합니다:
+  • 플레이어가 이 마을에서 누군가를 죽였다면: 목격자들이 긴장, 관리들이 경계
+  • 플레이어가 여기서 파벌을 도왔다면: 그 구성원들이 내부인처럼 대함
+  • 플레이어가 무언가를 불태우거나, 파괴하거나, 폭로했다면: 시민들이 대화에서 언급
+  • 플레이어에게 이름 있는 동료가 있다면: 그 동료가 함께 있고, 기여하며, 의견을 가짐
+  • 이름 있는 적대자가 플레이어를 추적 중이라면: 사람들이 경고받거나, 협박당하거나, 보고 유인책으로 매수됐을 수 있음
+NPC들이 모든 것을 알 필요는 없음 — 하지만 그들이 속한 공동체의 감정적 분위기에 반응해야 함.
+두려운 마을의 상인은 초조하다. 감사한 마을의 경비는 공손하다. 배신당한 도시의 행인은 모두를 의심한다.
 
 ═══ 개막 장면 규칙 (필수 — 1턴에만 적용) ═══
 개막 장면은 절대로 위기로 시작해서는 안 됩니다. 시야에 적이 없고, 전투가 없고, "추격당하고 있다"는 표현이 없어야 합니다.
@@ -1296,7 +1378,39 @@ router.post("/:id/choice", async (req, res) => {
       : "";
     const worldMemoryNote = buildWorldMemoryBlock(sessionId, lang);
 
-    const userMsg = `Player chose option ${choiceIndex + 1}: "${choiceText}"${skillNote}${keyItemNote}\n\nDICE ROLL: ${outcomeCtx}\nRolled: d20=${roll.raw}, ${roll.stat.toUpperCase()} modifier=${roll.modifier > 0 ? "+" : ""}${roll.modifier}, Total=${roll.total}${enemyNote}${goalNote}${inventoryNote}${worldMemoryNote}${skillsNote}\nPlayer stats: HP ${statsBeforeRoll.hp}/${statsBeforeRoll.maxHp}, STR ${statsBeforeRoll.strength}, CUN ${statsBeforeRoll.cunning}, WIL ${statsBeforeRoll.will}, REP ${statsBeforeRoll.reputation}\nTurn: ${session.turnCount + 1}`;
+    // Reputation tier label — tells the AI which NPC attitude tier to apply
+    const repValue = statsBeforeRoll.reputation;
+    const repTier = repValue <= 2
+      ? (lang === "ko" ? "무명/의심" : "UNKNOWN/SUSPICIOUS")
+      : repValue <= 4
+        ? (lang === "ko" ? "중립" : "NEUTRAL")
+        : repValue <= 6
+          ? (lang === "ko" ? "알려짐/존경" : "KNOWN/RESPECTED")
+          : repValue <= 8
+            ? (lang === "ko" ? "유명/두려움" : "FAMOUS/FEARED")
+            : (lang === "ko" ? "전설" : "LEGENDARY");
+    const repTierNote = lang === "ko"
+      ? `\n[NPC 태도 기준] 명성 단계: ${repTier} (REP ${repValue}) — 이번 장면의 모든 NPC는 이 단계로 행동해야 합니다.`
+      : `\n[NPC ATTITUDE] REPUTATION TIER: ${repTier} (REP ${repValue}) — ALL NPCs in this scene must behave according to this tier.`;
+
+    // All player skills (including on cooldown) — social skill awareness
+    const allSkillIds = skills.map(s => lang === "ko" ? `${s.nameKo}(${s.id})` : `${s.name}(${s.id})`);
+    const socialSkillNote = allSkillIds.length > 0
+      ? (lang === "ko"
+          ? `\n[사회 스킬 인식] 플레이어 보유 스킬: ${allSkillIds.join(", ")} — NPC는 이 스킬들의 분위기(위협, 설득, 카리스마 등)를 감지할 수 있습니다.`
+          : `\n[SOCIAL SKILL AWARENESS] Player skills: ${allSkillIds.join(", ")} — NPCs may sense the nature of these abilities (threat, charm, dark power, etc).`)
+      : "";
+
+    // Active companions extracted from world events
+    const worldEvtList = worldEventsMap.get(sessionId) ?? [];
+    const companionEvents = worldEvtList.filter(e => /recruit|합류/i.test(e));
+    const companionNote = companionEvents.length > 0
+      ? (lang === "ko"
+          ? `\n[현재 동료] ${companionEvents.join(" | ")} — 이들은 현재 장면에 존재하며 행동하고 의견을 표현합니다.`
+          : `\n[ACTIVE COMPANIONS] ${companionEvents.join(" | ")} — they are present in the scene and contribute actions and opinions.`)
+      : "";
+
+    const userMsg = `Player chose option ${choiceIndex + 1}: "${choiceText}"${skillNote}${keyItemNote}\n\nDICE ROLL: ${outcomeCtx}\nRolled: d20=${roll.raw}, ${roll.stat.toUpperCase()} modifier=${roll.modifier > 0 ? "+" : ""}${roll.modifier}, Total=${roll.total}${enemyNote}${goalNote}${inventoryNote}${worldMemoryNote}${skillsNote}${repTierNote}${socialSkillNote}${companionNote}\nPlayer stats: HP ${statsBeforeRoll.hp}/${statsBeforeRoll.maxHp}, STR ${statsBeforeRoll.strength}, CUN ${statsBeforeRoll.cunning}, WIL ${statsBeforeRoll.will}, REP ${statsBeforeRoll.reputation}\nTurn: ${session.turnCount + 1}`;
 
     messages.push({ role: "user", content: userMsg });
 
