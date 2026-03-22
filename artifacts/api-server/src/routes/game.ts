@@ -460,13 +460,35 @@ Combat is visceral and specific. Never generic enemies:
 - When NOT in combat: inCombat: false, enemy: null
 
 ═══ ITEM SYSTEM ═══
-Grant items via "itemsGained": [...] when narratively earned. Maximum 2 items per turn. Grant sparingly — only when the story truly earns it.
-Occasions: enemy defeated (drop loot 30% chance), NPC gift/trade, exploration discovery, special action reward.
+Grant items via "itemsGained": [...] whenever the narrative earns it. Maximum 2 items per turn.
+Items should feel FINDABLE — the world is full of them. Consumables and equipment are common currency of survival.
+
+DROP RULES — follow these exactly:
+
+  EXPLORATION & LOOTING (searching a room, body, ruin, crate, corpse, hidden compartment, etc.)
+  → 75% chance: grant 1 consumable (bandage, potion, food, fuel, salve — matched to world setting)
+  → 30% chance: additionally grant 1 equipment piece (a worn blade, cracked shield, old ring — fitting the world)
+  → Always check: did the player SEARCH or LOOT something? If yes, roll mentally and grant accordingly.
+
+  COMBAT VICTORY (enemy hp reaches 0)
+  → 65% chance: grant 1 consumable from the enemy's body (matched to enemy type and world)
+  → 30% chance: additionally grant 1 equipment piece the enemy was using or carrying
+  → A worthy enemy (named, boss-tier) ALWAYS drops at least 1 item
+
+  NPC INTERACTION (trade, bribe, charm, interrogate, help, or complete a quest for an NPC)
+  → Successful trade/bribe: grant the traded item or equivalent
+  → NPC grateful/impressed: 60% chance of a consumable gift (food, medicine, tool)
+  → NPC with a shop or stash: 40% chance of offering 1 equipment piece
+  → Completing an NPC's request: ALWAYS grant at least 1 item as reward
+
+  SPECIAL ACTIONS (exceptional dice rolls, creative solutions, critical successes)
+  → CRITICAL SUCCESS on any exploration or social action: always grant 1 bonus item
+  → Discovering a secret area or hidden cache: always grant 1-2 items
 
 Item types:
-- "consumable": single-use, immediate effect on use (hp heal/harm, temp stat change). Examples: healing potion, antidote, strength elixir
-- "equipment": passive stat bonus while equipped. Effect = permanent bonus. Examples: iron gauntlet (+2 strength), thief's ring (+2 cunning)
-- "key_item": narrative unlock, no stat effect. Include "condition" as comma-separated keywords that trigger usability. Examples: forged pass, governor's seal, encrypted data chip
+- "consumable": single-use, immediate effect on use (hp heal/harm, temp stat change). Examples: healing salve, bitter tonic, stimulant, ration, elixir, bandage, antidote
+- "equipment": passive stat bonus while equipped. Effect = permanent bonus. Examples: iron gauntlet (+2 strength), thief's ring (+2 cunning), worn amulet (+1 will)
+- "key_item": narrative unlock, no stat effect. RARE — see KEY ITEM SYSTEM below. Examples: forged pass, governor's seal, encrypted data chip
 
 Rarity & effect guidelines:
 - common: hp ±15-25 OR ±1 stat | uncommon: hp ±25-40 OR ±2 stats | rare: hp ±40-60 OR ±3 stats | legendary: transformative
@@ -474,10 +496,11 @@ Rarity & effect guidelines:
 Item JSON format (include in "itemsGained" array):
 { "id": "unique_snake_case_id", "name": "English Name", "nameKo": "한국어 이름", "description": "Brief English desc.", "descriptionKo": "한국어 설명.", "type": "consumable|equipment|key_item", "rarity": "common|uncommon|rare|legendary", "icon": "emoji", "effect": {"hp":0,"strength":0,"cunning":0,"will":0,"reputation":0}, "quantity": 1, "situational": false, "condition": "" }
 
-Rules: Do NOT include "itemsGained" unless granting items this turn. Never grant duplicate items.
+Rules: Do NOT include "itemsGained" unless granting items this turn. Never grant duplicate items (check inventory first).
 
 ═══ KEY ITEM SYSTEM ═══
-Key items are RARE and PRECIOUS — grant them only at critical story turning points (maximum 1 per 8 turns).
+Key items are EXTREMELY RARE — grant them only at critical, irreplaceable story turning points (maximum 1 per 10 turns, and only when the plot demands it).
+Never give key items as exploration loot or NPC rewards — they must feel earned through a major story beat.
 They are NOT passive tools. They unlock specific, narrow windows of opportunity.
 
 Key item "condition" field: write 2-4 keywords that precisely describe the ONLY moment this item becomes useful.
@@ -712,21 +735,44 @@ const SYSTEM_PROMPT_KO = `당신은 주사위 기반 스탯 시스템이 있는 
 - 전투 중이 아닐 때: inCombat: false, enemy: null
 
 ═══ 아이템 시스템 ═══
-"itemsGained": [...] 를 통해 서사적으로 획득했을 때 아이템을 부여하세요. 턴당 최대 2개. 아껴서 부여하세요.
-기회: 적 처치 (30% 확률 아이템 드롭), NPC 선물/거래, 탐험 발견, 특수 행동 보상.
+"itemsGained": [...] 를 통해 서사적으로 획득했을 때 아이템을 부여하세요. 턴당 최대 2개.
+아이템은 찾을 수 있어야 합니다 — 세계 곳곳에 있습니다. 소모품과 장비는 생존의 기본 통화입니다.
+
+드롭 규칙 — 반드시 따르세요:
+
+  탐험 & 파밍 (방 수색, 시체 뒤지기, 폐허, 상자, 숨겨진 공간 등)
+  → 75% 확률: 소모품 1개 지급 (붕대, 물약, 식량, 연료, 연고 — 세계관에 맞게)
+  → 30% 확률: 추가로 장비 1개 지급 (낡은 칼, 금 간 방패, 오래된 반지 — 세계관에 맞게)
+  → 항상 확인: 플레이어가 무언가를 수색하거나 파밍했는가? 그렇다면 확률적으로 지급하세요.
+
+  전투 승리 (적 hp가 0이 됐을 때)
+  → 65% 확률: 적의 몸에서 소모품 1개 지급 (적 유형과 세계관에 맞게)
+  → 30% 확률: 추가로 적이 사용하던 장비 1개 지급
+  → 이름 있는 적이나 보스급 적은 반드시 아이템 최소 1개 드롭
+
+  NPC 상호작용 (거래, 뇌물, 매력, 심문, 도움, 퀘스트 완료)
+  → 거래/뇌물 성공: 거래한 아이템 또는 동등한 것 지급
+  → NPC가 감사하거나 인상받음: 60% 확률로 소모품 선물 (음식, 약, 도구)
+  → 상점이나 물건을 가진 NPC: 40% 확률로 장비 1개 제공
+  → NPC 요청 완료: 반드시 아이템 최소 1개 보상으로 지급
+
+  특수 행동 (예외적인 주사위 결과, 창의적 해결, 대성공)
+  → 탐험이나 사교 행동에서 대성공: 반드시 보너스 아이템 1개 지급
+  → 비밀 구역이나 숨겨진 보관소 발견: 반드시 아이템 1~2개 지급
 
 아이템 종류:
-- "consumable": 1회 사용, 즉시 효과 (hp 회복/손상, 스탯 변화). 예: 치유 물약, 해독제, 힘의 엘릭서
-- "equipment": 장착 중 지속 스탯 보너스. 예: 철제 건틀렛 (+2 strength), 도적의 반지 (+2 cunning)
-- "key_item": 서사적 잠금 해제, 스탯 효과 없음. "condition"에 사용 가능 조건 키워드(쉼표 구분) 포함. 예: 위조 통행증, 총독의 인장
+- "consumable": 1회 사용, 즉시 효과 (hp 회복/손상, 스탯 변화). 예: 치유 연고, 쓴 강장제, 각성제, 식량, 해독제, 붕대
+- "equipment": 장착 중 지속 스탯 보너스. 예: 철제 건틀렛 (+2 strength), 도적의 반지 (+2 cunning), 낡은 부적 (+1 will)
+- "key_item": 서사적 잠금 해제, 스탯 효과 없음. 희귀함 — 아래 핵심 아이템 시스템 참조. 예: 위조 통행증, 총독의 인장
 
 아이템 JSON 형식 ("itemsGained" 배열에 포함):
 { "id": "고유_식별자", "name": "English Name", "nameKo": "한국어 이름", "description": "영어 설명.", "descriptionKo": "한국어 설명.", "type": "consumable|equipment|key_item", "rarity": "common|uncommon|rare|legendary", "icon": "이모지", "effect": {"hp":0,"strength":0,"cunning":0,"will":0,"reputation":0}, "quantity": 1, "situational": false, "condition": "" }
 
-규칙: 이번 턴에 아이템을 부여하지 않으면 "itemsGained" 포함 불필요. 중복 아이템 금지.
+규칙: 이번 턴에 아이템을 부여하지 않으면 "itemsGained" 포함 불필요. 중복 아이템 금지 (인벤토리 먼저 확인).
 
 ═══ 핵심 아이템 시스템 ═══
-핵심 아이템은 희귀하고 귀합니다 — 이야기의 결정적 전환점에서만 부여하세요 (최대 8턴당 1개).
+핵심 아이템은 극도로 희귀합니다 — 이야기의 결정적이고 대체 불가능한 전환점에서만 부여하세요 (최대 10턴당 1개, 플롯이 필요로 할 때만).
+탐험 파밍이나 NPC 보상으로 절대 지급하지 마세요 — 반드시 주요 스토리 분기점에서 얻어진 것으로 느껴져야 합니다.
 수동적인 도구가 아닙니다. 좁고 특정한 기회의 창을 열어줍니다.
 
 "condition" 필드: 이 아이템이 유용해지는 유일한 순간을 정확히 설명하는 2~4개의 키워드.
