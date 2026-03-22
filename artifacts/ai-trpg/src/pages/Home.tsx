@@ -13,19 +13,26 @@ import type { Skill, SkillType } from "@/types";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type Archetype = "fighter" | "trickster" | "scholar" | "speaker";
+type StatBonus = { strength?: number; cunning?: number; will?: number; reputation?: number; hp?: number };
 
-type QuestionOption = {
-  text: string;
-  textKo: string;
-  archetype: Archetype;
-  bonus: { strength?: number; cunning?: number; will?: number; reputation?: number; hp?: number };
+type ClassOption = {
+  en: string;
+  ko: string;
+  desc: string;
+  descKo: string;
+  bonus: StatBonus;
 };
 
-type Question = {
+type BgOption = {
   text: string;
   textKo: string;
-  options: QuestionOption[];
+  bonus: StatBonus;
+};
+
+type BgQuestion = {
+  text: string;
+  textKo: string;
+  options: BgOption[];
 };
 
 type ComputedStats = {
@@ -37,57 +44,125 @@ type ComputedStats = {
 
 const GENRE_KEYS = ["fantasy", "dark fantasy", "sci-fi", "horror", "western"] as const;
 
-const BASE_STATS: ComputedStats = { hp: 60, maxHp: 60, strength: 2, cunning: 2, will: 2, reputation: 2 };
+const BASE_STATS: ComputedStats = { hp: 55, maxHp: 55, strength: 2, cunning: 2, will: 2, reputation: 2 };
 
-const ARCHETYPE_CLASS: Record<Archetype, { en: string; ko: string; desc: string; descKo: string }> = {
-  fighter:  { en: "Warrior",  ko: "전사",     desc: "Your body is your weapon. You endure, push forward, and outlast.", descKo: "몸이 무기다. 버티고, 밀어붙이고, 마지막까지 살아남는다." },
-  trickster:{ en: "Rogue",    ko: "도적",     desc: "You read the room before the room reads you.",                     descKo: "방이 당신을 읽기 전에 당신이 방을 읽는다." },
-  scholar:  { en: "Mage",     ko: "마법사",   desc: "Understanding is power. You bend the world with your mind.",       descKo: "이해가 힘이다. 당신은 정신으로 세계를 구부린다." },
-  speaker:  { en: "Bard",     ko: "음유시인", desc: "You move people. Every room is a stage, every face a story.",      descKo: "당신은 사람을 움직인다. 모든 방이 무대고, 모든 얼굴이 이야기다." },
-};
-
-const QUESTIONS: Question[] = [
+const CLASS_OPTIONS: ClassOption[] = [
   {
-    text:   "Which path calls to you?",
-    textKo: "어떤 길을 걷겠습니까?",
-    options: [
-      { text: "The Warrior's Path — strength and blade above all else.",        textKo: "전사의 길 — 힘과 칼날이 모든 것에 앞선다.",             archetype: "fighter",   bonus: { strength: 4, will: 2 } },
-      { text: "The Rogue's Path — the unseen hand that moves the world.",       textKo: "도적의 길 — 세상을 움직이는 보이지 않는 손.",           archetype: "trickster", bonus: { cunning: 4, reputation: 2 } },
-      { text: "The Mage's Path — to understand is to hold power over the world.", textKo: "마법사의 길 — 이해하는 자가 세계를 지배한다.",          archetype: "scholar",   bonus: { will: 4, cunning: 2 } },
-      { text: "The Bard's Path — words and music open doors that swords cannot.", textKo: "음유시인의 길 — 말과 음악은 칼이 열지 못하는 문을 연다.", archetype: "speaker",   bonus: { reputation: 4, will: 2 } },
-    ],
+    en: "Warrior",      ko: "전사",
+    desc:   "Your body is your weapon. You endure, push forward, and outlast.",
+    descKo: "몸이 무기다. 버티고, 밀어붙이고, 마지막까지 살아남는다.",
+    bonus: { strength: 4, will: 1, hp: 15 },
   },
   {
-    text:   "How did you live your life?",
-    textKo: "당신은 어떤 삶을 살았나요?",
+    en: "Rogue",        ko: "도적",
+    desc:   "You read the room before the room reads you.",
+    descKo: "방이 당신을 읽기 전에 당신이 방을 읽는다.",
+    bonus: { cunning: 4, reputation: 2 },
+  },
+  {
+    en: "Mage",         ko: "마법사",
+    desc:   "Understanding is power. You bend the world with your mind.",
+    descKo: "이해가 힘이다. 당신은 정신으로 세계를 구부린다.",
+    bonus: { will: 4, cunning: 2 },
+  },
+  {
+    en: "Paladin",      ko: "성기사",
+    desc:   "You carry a sacred light into the darkest places.",
+    descKo: "가장 어두운 곳에 신성한 빛을 들고 간다.",
+    bonus: { will: 3, strength: 2, reputation: 1, hp: 10 },
+  },
+  {
+    en: "Ranger",       ko: "레인저",
+    desc:   "The wild is your home. Your arrow never misses what matters.",
+    descKo: "야생이 내 집이다. 화살은 중요한 것을 절대 빗나가지 않는다.",
+    bonus: { cunning: 3, strength: 2, hp: 5 },
+  },
+  {
+    en: "Necromancer",  ko: "사령술사",
+    desc:   "Death is not an end — it is a resource.",
+    descKo: "죽음은 끝이 아니다 — 하나의 자원이다.",
+    bonus: { will: 4, cunning: 2 },
+  },
+  {
+    en: "Bard",         ko: "음유시인",
+    desc:   "Every room is a stage. Every face is a story waiting to be told.",
+    descKo: "모든 방이 무대고, 모든 얼굴이 이야기다.",
+    bonus: { reputation: 4, will: 2 },
+  },
+  {
+    en: "Druid",        ko: "드루이드",
+    desc:   "You hear what the living world whispers. You answer in kind.",
+    descKo: "살아있는 세계가 속삭이는 것을 듣는다. 같은 방식으로 대답한다.",
+    bonus: { will: 3, cunning: 2, hp: 5 },
+  },
+  {
+    en: "Ironclad",     ko: "철갑전사",
+    desc:   "Nothing stops your advance. Pain is information. You use it.",
+    descKo: "아무것도 당신의 전진을 막지 못한다. 고통은 정보다. 이용한다.",
+    bonus: { strength: 4, hp: 20 },
+  },
+  {
+    en: "Hexblade",     ko: "저주검사",
+    desc:   "Blade and curse — you wield both, and the world suffers for it.",
+    descKo: "칼날과 저주 — 둘 다 다루며, 세상은 그 대가를 치른다.",
+    bonus: { will: 3, strength: 2, cunning: 1 },
+  },
+];
+
+const BG_QUESTIONS: BgQuestion[] = [
+  {
+    text:   "How did you spend your early years?",
+    textKo: "어린 시절을 어떻게 보냈나요?",
     options: [
-      { text: "I walked battlefields. Steel was my language.",              textKo: "전장을 누볐다. 칼이 내 언어였다.",                archetype: "fighter",   bonus: { strength: 2, will: 1 } },
-      { text: "I survived in the shadows. No one remembers my face.",       textKo: "그림자 속에서 살아남았다. 아무도 내 얼굴을 모른다.", archetype: "trickster", bonus: { cunning: 2, reputation: 1 } },
-      { text: "I pursued knowledge. I believed every question had an answer.", textKo: "지식을 탐구했다. 답 없는 질문은 없다고 믿었다.",   archetype: "scholar",   bonus: { will: 2, cunning: 1 } },
-      { text: "I lived among people. The world moves on relationships.",    textKo: "사람들 속에서 살았다. 세상은 관계로 움직인다.",      archetype: "speaker",   bonus: { reputation: 2, will: 1 } },
+      { text: "Training under a harsh master. Every bruise was a lesson.",        textKo: "혹독한 스승 아래 훈련했다. 모든 멍이 교훈이었다.",                bonus: { strength: 2, will: 1 } },
+      { text: "Running errands in narrow alleys. Learning who to trust — and who not to.", textKo: "좁은 골목을 뛰어다녔다. 믿을 자와 믿지 말아야 할 자를 배웠다.", bonus: { cunning: 2, reputation: 1 } },
+      { text: "Lost in books and ruins. Every answer led to three more questions.", textKo: "책과 폐허에 빠져 살았다. 모든 답은 세 개의 질문을 낳았다.",          bonus: { will: 2, cunning: 1 } },
+      { text: "Growing up among crowds. Learning names, faces, debts, and favors.", textKo: "군중 속에서 자랐다. 이름, 얼굴, 빚, 은혜를 배웠다.",               bonus: { reputation: 2, will: 1 } },
     ],
   },
   {
     text:   "When danger finds you, you...",
     textKo: "위기에 처했을 때, 당신은?",
     options: [
-      { text: "Face it head-on. Retreat has never been an option.",         textKo: "정면으로 맞선다. 물러서는 건 선택지에 없었다.",      archetype: "fighter",   bonus: { strength: 2, hp: 10 } },
-      { text: "Watch for an opening. Strike at the exact right moment.",    textKo: "틈을 본다. 정확히 맞는 순간에 움직인다.",            archetype: "trickster", bonus: { cunning: 2, strength: 1 } },
-      { text: "Stay cold. Analyze the problem before letting emotion in.",  textKo: "냉정함을 유지한다. 감정보다 분석이 먼저다.",           archetype: "scholar",   bonus: { will: 2, cunning: 1 } },
-      { text: "Rally those around you. You never had to fight alone.",      textKo: "주변을 움직인다. 혼자 싸워야 할 이유가 없었다.",      archetype: "speaker",   bonus: { reputation: 2, will: 1 } },
+      { text: "Face it head-on. Retreat has never been an option.",          textKo: "정면으로 맞선다. 물러서는 건 선택지에 없었다.",    bonus: { strength: 2, hp: 8 } },
+      { text: "Watch for an opening. Strike at the exact right moment.",     textKo: "틈을 노린다. 정확히 맞는 순간에 움직인다.",        bonus: { cunning: 2, strength: 1 } },
+      { text: "Stay cold. Analyze the problem before letting emotion in.",   textKo: "냉정함을 유지한다. 감정보다 분석이 먼저다.",        bonus: { will: 2, cunning: 1 } },
+      { text: "Rally those around you. You never had to fight alone.",       textKo: "주변을 움직인다. 혼자 싸워야 할 이유가 없었다.",   bonus: { reputation: 2, will: 1 } },
     ],
   },
   {
     text:   "What do you fear most?",
     textKo: "당신이 가장 두려워하는 것은?",
     options: [
-      { text: "Weakness. The day strength finally leaves you.",             textKo: "나약함. 힘이 마침내 떠나는 날.",                    archetype: "fighter",   bonus: { strength: 2, will: 1 } },
-      { text: "Being deceived. Someone seeing through you before you see through them.", textKo: "속는 것. 내가 먼저 꿰뚫기 전에 들키는 것.", archetype: "trickster", bonus: { cunning: 2, reputation: 1 } },
-      { text: "Ignorance. The thing you cannot understand and cannot stop.", textKo: "무지. 이해도, 막을 수도 없는 것.",                   archetype: "scholar",   bonus: { will: 2, cunning: 1 } },
-      { text: "Solitude. A world with no one left in it.",                  textKo: "고독. 아무도 남지 않은 세상.",                       archetype: "speaker",   bonus: { reputation: 2, will: 1 } },
+      { text: "Weakness. The day strength finally leaves you.",                         textKo: "나약함. 힘이 마침내 떠나는 날.",                     bonus: { strength: 2, will: 1 } },
+      { text: "Being deceived. Someone seeing through you before you see through them.", textKo: "속는 것. 내가 먼저 꿰뚫기 전에 들키는 것.",           bonus: { cunning: 2, reputation: 1 } },
+      { text: "Ignorance. The thing you cannot understand and cannot stop.",            textKo: "무지. 이해도, 막을 수도 없는 것.",                    bonus: { will: 2, cunning: 1 } },
+      { text: "Solitude. A world with no one left in it.",                             textKo: "고독. 아무도 남지 않은 세상.",                        bonus: { reputation: 2, will: 1 } },
+    ],
+  },
+  {
+    text:   "What is your greatest strength?",
+    textKo: "당신의 가장 큰 강점은 무엇인가요?",
+    options: [
+      { text: "Endurance. I outlast anything that tries to break me.",   textKo: "인내. 나를 부수려는 것보다 오래 버틴다.",          bonus: { strength: 1, will: 2, hp: 5 } },
+      { text: "Observation. Nothing moves without my noticing.",          textKo: "관찰력. 내 눈을 피해 움직이는 것은 없다.",         bonus: { cunning: 3 } },
+      { text: "Insight. I see patterns where others see noise.",          textKo: "통찰. 남들이 소음으로 보는 곳에서 패턴을 찾는다.", bonus: { will: 3 } },
+      { text: "Connection. People remember me. I make sure of it.",      textKo: "유대감. 사람들이 나를 기억한다. 내가 그걸 확인한다.", bonus: { reputation: 3 } },
+    ],
+  },
+  {
+    text:   "Why do you step into the unknown?",
+    textKo: "왜 미지의 세계로 발을 내딛나요?",
+    options: [
+      { text: "To settle a debt written in blood. Someone will answer for it.",    textKo: "피로 쓰인 빚을 갚기 위해. 누군가 그 대가를 치를 것이다.",    bonus: { strength: 2, will: 1 } },
+      { text: "Because staying still is slower death. Movement keeps me alive.",   textKo: "가만히 있으면 더 느리게 죽기 때문이다. 움직임이 나를 살린다.", bonus: { cunning: 1, strength: 1, hp: 10 } },
+      { text: "There are answers out there. I refuse to die without finding them.", textKo: "거기에 답이 있다. 찾기 전에 죽기를 거부한다.",               bonus: { will: 2, cunning: 1 } },
+      { text: "Because someone has to. And I want my name remembered for it.",     textKo: "누군가 해야 하기 때문이다. 그 이름이 기억되길 원한다.",         bonus: { reputation: 2, will: 1 } },
     ],
   },
 ];
+
+const TOTAL_QUESTIONS = 1 + BG_QUESTIONS.length;
 
 const SKILL_TYPE_META: Record<SkillType, { label: string; labelKo: string; color: string }> = {
   combat:   { label: "Combat",   labelKo: "전투",   color: "text-red-400/80 border-red-500/25 bg-red-950/20" },
@@ -101,26 +176,32 @@ const STAT_LABELS_KO = { strength: "힘",  cunning: "교활", will: "의지", re
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function computeStats(answers: number[]): ComputedStats {
-  const stats = { ...BASE_STATS };
-  answers.forEach((optIdx, qIdx) => {
-    const bonus = QUESTIONS[qIdx]?.options[optIdx]?.bonus ?? {};
-    if (bonus.strength)   stats.strength   = Math.min(10, stats.strength   + bonus.strength);
-    if (bonus.cunning)    stats.cunning    = Math.min(10, stats.cunning    + bonus.cunning);
-    if (bonus.will)       stats.will       = Math.min(10, stats.will       + bonus.will);
-    if (bonus.reputation) stats.reputation = Math.min(10, stats.reputation + bonus.reputation);
-    if (bonus.hp)         { stats.hp += bonus.hp; stats.maxHp += bonus.hp; }
-  });
-  return stats;
+function applyBonus(stats: ComputedStats, bonus: StatBonus): ComputedStats {
+  const s = { ...stats };
+  if (bonus.strength)   s.strength   = Math.min(10, s.strength   + bonus.strength);
+  if (bonus.cunning)    s.cunning    = Math.min(10, s.cunning    + bonus.cunning);
+  if (bonus.will)       s.will       = Math.min(10, s.will       + bonus.will);
+  if (bonus.reputation) s.reputation = Math.min(10, s.reputation + bonus.reputation);
+  if (bonus.hp)         { s.hp += bonus.hp; s.maxHp += bonus.hp; }
+  return s;
 }
 
-function inferArchetype(answers: number[]): Archetype {
-  const counts: Record<Archetype, number> = { fighter: 0, trickster: 0, scholar: 0, speaker: 0 };
-  answers.forEach((optIdx, qIdx) => {
-    const arch = QUESTIONS[qIdx]?.options[optIdx]?.archetype;
-    if (arch) counts[arch]++;
-  });
-  return (Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0]) as Archetype;
+function computeStats(answers: number[]): ComputedStats {
+  let stats = { ...BASE_STATS };
+  if (answers.length === 0) return stats;
+
+  // Q1 (index 0) = class choice → apply class bonus
+  const classOpt = CLASS_OPTIONS[answers[0]];
+  if (classOpt) stats = applyBonus(stats, classOpt.bonus);
+
+  // Q2+ (index 1…) = background questions → apply bg bonuses
+  for (let i = 1; i < answers.length; i++) {
+    const bgQ   = BG_QUESTIONS[i - 1];
+    const bgOpt = bgQ?.options[answers[i]];
+    if (bgOpt) stats = applyBonus(stats, bgOpt.bonus);
+  }
+
+  return stats;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -130,36 +211,34 @@ export default function Home() {
   const { lang, t }     = useLang();
 
   // Step 1 state
-  const [playerName,     setPlayerName]     = useState("");
-  const [selectedGenre,  setSelectedGenre]  = useState("");
-  const [attempted,      setAttempted]      = useState(false);
+  const [playerName,       setPlayerName]       = useState("");
+  const [selectedGenre,    setSelectedGenre]    = useState("");
+  const [attempted,        setAttempted]        = useState(false);
 
-  // Step 2 state
-  const [answers,        setAnswers]        = useState<number[]>([]);
-  const [currentQ,       setCurrentQ]       = useState(0);
+  // Step 2 state: answers[0] = class, answers[1..5] = bg questions
+  const [answers,          setAnswers]          = useState<number[]>([]);
+  const [currentQ,         setCurrentQ]         = useState(0);
 
   // Step 3 state
-  const [skillPool,      setSkillPool]      = useState<Skill[]>([]);
-  const [loadingSkills,  setLoadingSkills]  = useState(false);
+  const [skillPool,        setSkillPool]        = useState<Skill[]>([]);
+  const [loadingSkills,    setLoadingSkills]    = useState(false);
   const [selectedSkillIds, setSelectedSkillIds] = useState<string[]>([]);
-  const [skillAttempted, setSkillAttempted] = useState(false);
+  const [skillAttempted,   setSkillAttempted]   = useState(false);
 
-  // Navigation
-  const [step,           setStep]           = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useState<1 | 2 | 3>(1);
 
-  // Derived
-  const computedStats   = answers.length === QUESTIONS.length ? computeStats(answers) : null;
-  const archetype       = answers.length === QUESTIONS.length ? inferArchetype(answers) : null;
-  const archetypeInfo   = archetype ? ARCHETYPE_CLASS[archetype] : null;
-  const inferredClass   = lang === "ko" ? archetypeInfo?.ko : archetypeInfo?.en;
+  // Derived — class is ALWAYS answers[0], never recalculated from later answers
+  const allAnswered   = answers.length === TOTAL_QUESTIONS;
+  const classOption   = answers.length > 0 ? CLASS_OPTIONS[answers[0]] : null;
+  const computedStats = allAnswered ? computeStats(answers) : null;
 
   // Fetch skill pool when entering step 3
   useEffect(() => {
-    if (step !== 3 || !archetypeInfo || !computedStats) return;
+    if (step !== 3 || !classOption || !computedStats) return;
     setLoadingSkills(true);
     setSelectedSkillIds([]);
     const { strength: str, cunning: cun, will: wil, reputation: rep } = computedStats;
-    const classParam = encodeURIComponent(archetypeInfo.en);
+    const classParam = encodeURIComponent(classOption.en);
     apiRequest("GET", `/api/game/skill-pool?characterClass=${classParam}&lang=${lang}&str=${str}&cun=${cun}&wil=${wil}&rep=${rep}`)
       .then(r => r.json())
       .then(data => setSkillPool(data.skills ?? []))
@@ -177,10 +256,9 @@ export default function Home() {
   const handleAnswer = useCallback((optionIndex: number) => {
     const newAnswers = [...answers, optionIndex];
     setAnswers(newAnswers);
-    if (currentQ < QUESTIONS.length - 1) {
+    if (currentQ < TOTAL_QUESTIONS - 1) {
       setTimeout(() => setCurrentQ(q => q + 1), 120);
     } else {
-      // All questions answered — go to skill selection
       setTimeout(() => setStep(3), 180);
     }
   }, [answers, currentQ]);
@@ -197,12 +275,12 @@ export default function Home() {
   const startMutation = useMutation({
     mutationFn: async () => {
       const res = await apiRequest("POST", "/api/game/start", {
-        genre:           selectedGenre,
-        characterClass:  archetypeInfo?.en ?? "Warrior",
-        playerName:      playerName.trim(),
+        genre:          selectedGenre,
+        characterClass: classOption?.en ?? "Warrior",
+        playerName:     playerName.trim(),
         lang,
-        skillIds:        selectedSkillIds,
-        customStats:     computedStats,
+        skillIds:       selectedSkillIds,
+        customStats:    computedStats,
       });
       return res.json();
     },
@@ -215,12 +293,17 @@ export default function Home() {
     startMutation.mutate();
   };
 
-  const question = QUESTIONS[currentQ];
+  // Current question rendering data
+  const isClassQuestion = currentQ === 0;
+  const bgQuestion      = !isClassQuestion ? BG_QUESTIONS[currentQ - 1] : null;
+
+  const questionText   = isClassQuestion
+    ? (lang === "ko" ? "어떤 길을 걷겠습니까?" : "Which path calls to you?")
+    : (lang === "ko" ? bgQuestion!.textKo : bgQuestion!.text);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <header className="border-b border-border/40 px-4 py-3 flex justify-between items-center">
-        {/* Back button */}
         <div className="w-20">
           {step > 1 && !startMutation.isPending && (
             <button
@@ -241,7 +324,7 @@ export default function Home() {
       <main className="flex-1 flex flex-col items-center justify-center px-4 py-10">
         <AnimatePresence mode="wait">
 
-          {/* ─── STEP 1: Genre ─── */}
+          {/* ─── STEP 1: Genre & Name ─── */}
           {step === 1 && (
             <motion.div
               key="step1"
@@ -316,7 +399,7 @@ export default function Home() {
             </motion.div>
           )}
 
-          {/* ─── STEP 2: Background Questions ─── */}
+          {/* ─── STEP 2: Questions ─── */}
           {step === 2 && (
             <motion.div
               key="step2"
@@ -324,16 +407,16 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -12 }}
               transition={{ duration: 0.25 }}
-              className="w-full max-w-md space-y-6"
+              className="w-full max-w-lg space-y-6"
             >
-              {/* Progress */}
+              {/* Progress bar */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-xs text-muted-foreground/50">
                   <span>{lang === "ko" ? "과거의 기록" : "Your History"}</span>
-                  <span>{currentQ + 1} / {QUESTIONS.length}</span>
+                  <span>{currentQ + 1} / {TOTAL_QUESTIONS}</span>
                 </div>
-                <div className="flex gap-1.5">
-                  {QUESTIONS.map((_, i) => (
+                <div className="flex gap-1">
+                  {Array.from({ length: TOTAL_QUESTIONS }).map((_, i) => (
                     <div
                       key={i}
                       className={`h-0.5 flex-1 rounded-full transition-all duration-300 ${
@@ -354,30 +437,60 @@ export default function Home() {
                   transition={{ duration: 0.2 }}
                   className="space-y-5"
                 >
+                  {/* Class question label */}
+                  {isClassQuestion && (
+                    <p className="text-[10px] uppercase tracking-widest text-primary/60 font-semibold">
+                      {lang === "ko" ? "직업 선택" : "Choose Your Class"}
+                    </p>
+                  )}
+
                   <h2 className="text-xl font-serif font-semibold text-foreground/90 leading-snug">
-                    {lang === "ko" ? question.textKo : question.text}
+                    {questionText}
                   </h2>
 
-                  <div className="space-y-2">
-                    {question.options.map((option, idx) => (
-                      <motion.button
-                        key={idx}
-                        whileHover={{ scale: 1.01 }}
-                        whileTap={{ scale: 0.99 }}
-                        onClick={() => handleAnswer(idx)}
-                        className="w-full text-left px-4 py-3.5 rounded-lg border border-border/40 bg-card hover:border-primary/40 hover:bg-primary/5 transition-all text-sm text-foreground/80 hover:text-foreground"
-                      >
-                        {lang === "ko" ? option.textKo : option.text}
-                      </motion.button>
-                    ))}
-                  </div>
+                  {/* Class selection: 2-column grid for 10 options */}
+                  {isClassQuestion ? (
+                    <div className="grid grid-cols-2 gap-2">
+                      {CLASS_OPTIONS.map((cls, idx) => (
+                        <motion.button
+                          key={idx}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => handleAnswer(idx)}
+                          className="text-left px-3.5 py-3 rounded-lg border border-border/40 bg-card hover:border-primary/40 hover:bg-primary/5 transition-all"
+                        >
+                          <div className="text-sm font-semibold text-foreground/90">
+                            {lang === "ko" ? cls.ko : cls.en}
+                          </div>
+                          <div className="text-[11px] text-muted-foreground/55 mt-0.5 leading-snug">
+                            {lang === "ko" ? cls.descKo : cls.desc}
+                          </div>
+                        </motion.button>
+                      ))}
+                    </div>
+                  ) : (
+                    /* Background questions: single column */
+                    <div className="space-y-2">
+                      {bgQuestion!.options.map((option, idx) => (
+                        <motion.button
+                          key={idx}
+                          whileHover={{ scale: 1.01 }}
+                          whileTap={{ scale: 0.99 }}
+                          onClick={() => handleAnswer(idx)}
+                          className="w-full text-left px-4 py-3.5 rounded-lg border border-border/40 bg-card hover:border-primary/40 hover:bg-primary/5 transition-all text-sm text-foreground/80 hover:text-foreground"
+                        >
+                          {lang === "ko" ? option.textKo : option.text}
+                        </motion.button>
+                      ))}
+                    </div>
+                  )}
                 </motion.div>
               </AnimatePresence>
             </motion.div>
           )}
 
           {/* ─── STEP 3: Skill Selection ─── */}
-          {step === 3 && computedStats && archetypeInfo && (
+          {step === 3 && computedStats && classOption && (
             <motion.div
               key="step3"
               initial={{ opacity: 0, y: 12 }}
@@ -393,10 +506,10 @@ export default function Home() {
                     {lang === "ko" ? "당신이 걸어온 길" : "Your Path"}
                   </p>
                   <p className="text-base font-semibold text-foreground">
-                    {lang === "ko" ? archetypeInfo.ko : archetypeInfo.en}
+                    {lang === "ko" ? classOption.ko : classOption.en}
                   </p>
                   <p className="text-xs text-muted-foreground/60 italic">
-                    {lang === "ko" ? archetypeInfo.descKo : archetypeInfo.desc}
+                    {lang === "ko" ? classOption.descKo : classOption.desc}
                   </p>
                 </div>
                 <div className="flex items-center gap-3 text-[11px] flex-wrap pt-1 border-t border-border/20">
