@@ -828,7 +828,7 @@ router.get("/skill-pool", (req, res) => {
 
 router.post("/start", async (req, res) => {
   try {
-    const { genre = "fantasy", characterClass, playerName, lang = "en", skillIds, customStats } = req.body;
+    const { genre = "fantasy", characterClass, playerName, lang = "en", skillIds, customStats, backgroundAnswers } = req.body;
     const title = playerName ? `${playerName}'s Chronicle` : "Chronicle";
 
     const [session] = await db.insert(gameSessions).values({ title, genre }).returning();
@@ -868,9 +868,19 @@ router.post("/start", async (req, res) => {
       `${lang === "ko" ? s.nameKo : s.name}: ${lang === "ko" ? s.descriptionKo : s.description}`
     ).join("; ");
 
+    // Build backstory block from background answers
+    const bgPairs: Array<{ question: string; answer: string }> = Array.isArray(backgroundAnswers) ? backgroundAnswers : [];
+    const backstoryBlock = bgPairs.length > 0
+      ? (lang === "ko"
+          ? `\n\n[플레이어 과거 — 이것을 개막 서사에 자연스럽게 녹여낼 것. 직접 나열하지 말고 내러티브로 암시하거나 회상으로 스며들게 할 것]\n` +
+            bgPairs.map((p, i) => `${i + 1}. ${p.question} → ${p.answer}`).join("\n")
+          : `\n\n[Player Backstory — weave this into the opening scene naturally. Do NOT list them. Let them surface as memories, scars, habits, or implicit context that bleeds into the prose]\n` +
+            bgPairs.map((p, i) => `${i + 1}. ${p.question} → ${p.answer}`).join("\n"))
+      : "";
+
     const openingPrompt = lang === "ko"
-      ? `장르 톤: ${genre}\n캐릭터 역할(행동 방식 렌즈, 세계 설정이 아님): ${classStr || "모험가"}\n스탯: HP ${startingStats.hp}/${startingStats.maxHp}, 힘 ${startingStats.strength}, 교활 ${startingStats.cunning}, 의지 ${startingStats.will}, 명성 ${startingStats.reputation}\n스킬: ${skillsInfo}\n\n직업에 얽매이지 말고 완전히 새롭고 독창적인 세계와 시나리오를 창조하세요. 이 직업을 가진 캐릭터가 어울리지 않아 보이는 예상치 못한 배경이면 더욱 좋습니다. 다중 단계가 필요한 복잡하고 구체적인 최종 목표("goal", "goalShort")를 정의하고, 분위기와 긴장감으로 이야기를 시작하세요.\n\n첫 번째 선택지 3가지는 반드시 서로 다른 행동 유형이어야 합니다: 하나는 힘/전투, 하나는 은신/기만, 하나는 이동/탐험. 그리고 현재 위치에서 도달 가능한 2~3개의 인접 구역을 암시하세요.`
-      : `Genre tone: ${genre}\nCharacter role (action-style lens, NOT world setting): ${classStr || "Adventurer"}\nStats: HP ${startingStats.hp}/${startingStats.maxHp}, STR ${startingStats.strength}, CUN ${startingStats.cunning}, WIL ${startingStats.will}, REP ${startingStats.reputation}\nSkills: ${skillsInfo}\n\nIgnore any genre assumptions tied to the class. Build a completely original world that this character would have no obvious reason to be in — the unexpected combination is the point. Define a complex, multi-step final goal ("goal", "goalShort") requiring at least 4 distinct phases to achieve. Open with atmosphere and tension.\n\nThe first 3 choices MUST be different action types: one Force/Combat, one Stealth/Deception, one Movement/Exploration. Hint at 2-3 adjacent zones the player could reach from the starting location.`;
+      ? `장르 톤: ${genre}\n캐릭터 역할(행동 방식 렌즈, 세계 설정이 아님): ${classStr || "모험가"}\n스탯: HP ${startingStats.hp}/${startingStats.maxHp}, 힘 ${startingStats.strength}, 교활 ${startingStats.cunning}, 의지 ${startingStats.will}, 명성 ${startingStats.reputation}\n스킬: ${skillsInfo}${backstoryBlock}\n\n직업에 얽매이지 말고 완전히 새롭고 독창적인 세계와 시나리오를 창조하세요. 이 직업을 가진 캐릭터가 어울리지 않아 보이는 예상치 못한 배경이면 더욱 좋습니다. 다중 단계가 필요한 복잡하고 구체적인 최종 목표("goal", "goalShort")를 정의하고, 분위기와 긴장감으로 이야기를 시작하세요. 플레이어의 과거가 왜 이 장소에 있는지, 어떻게 여기까지 오게 되었는지를 자연스럽게 설명해 주세요.\n\n첫 번째 선택지 3가지는 반드시 서로 다른 행동 유형이어야 합니다: 하나는 힘/전투, 하나는 은신/기만, 하나는 이동/탐험. 그리고 현재 위치에서 도달 가능한 2~3개의 인접 구역을 암시하세요.`
+      : `Genre tone: ${genre}\nCharacter role (action-style lens, NOT world setting): ${classStr || "Adventurer"}\nStats: HP ${startingStats.hp}/${startingStats.maxHp}, STR ${startingStats.strength}, CUN ${startingStats.cunning}, WIL ${startingStats.will}, REP ${startingStats.reputation}\nSkills: ${skillsInfo}${backstoryBlock}\n\nIgnore any genre assumptions tied to the class. Build a completely original world that this character would have no obvious reason to be in — the unexpected combination is the point. Define a complex, multi-step final goal ("goal", "goalShort") requiring at least 4 distinct phases to achieve. Open with atmosphere and tension. Use the player's backstory to explain HOW and WHY they ended up here — let it surface as memory flashes, habits, and physical detail woven into the prose, not as exposition.\n\nThe first 3 choices MUST be different action types: one Force/Combat, one Stealth/Deception, one Movement/Exploration. Hint at 2-3 adjacent zones the player could reach from the starting location.`;
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4o",

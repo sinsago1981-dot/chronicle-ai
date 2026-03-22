@@ -274,13 +274,25 @@ export default function Home() {
 
   const startMutation = useMutation({
     mutationFn: async () => {
+      // Build background answer pairs for the AI to use as backstory
+      const backgroundAnswers = BG_QUESTIONS.map((q, i) => {
+        const answerIdx = answers[i + 1];
+        if (answerIdx === undefined) return null;
+        const opt = q.options[answerIdx];
+        return {
+          question: lang === "ko" ? q.textKo    : q.text,
+          answer:   lang === "ko" ? opt.textKo  : opt.text,
+        };
+      }).filter(Boolean);
+
       const res = await apiRequest("POST", "/api/game/start", {
-        genre:          selectedGenre,
-        characterClass: classOption?.en ?? "Warrior",
-        playerName:     playerName.trim(),
+        genre:             selectedGenre,
+        characterClass:    classOption?.en ?? "Warrior",
+        playerName:        playerName.trim(),
         lang,
-        skillIds:       selectedSkillIds,
-        customStats:    computedStats,
+        skillIds:          selectedSkillIds,
+        customStats:       computedStats,
+        backgroundAnswers,
       });
       return res.json();
     },
