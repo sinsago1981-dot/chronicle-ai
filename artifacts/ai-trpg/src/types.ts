@@ -68,6 +68,7 @@ export type StatusEffect = {
 
 export type Enemy = {
   name: string;
+  nameKo?: string;
   hp: number;
   maxHp: number;
   attack: number;

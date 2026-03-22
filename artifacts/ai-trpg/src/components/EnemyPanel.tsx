@@ -105,7 +105,7 @@ export const EnemyPanel = memo(function EnemyPanel({ enemy, changes }: Props) {
               transition={{ duration: 0.3 }}
               className="font-serif font-bold text-base text-red-200 tracking-wide text-center"
             >
-              {enemy.name}
+              {lang === "ko" ? (enemy.nameKo ?? enemy.name) : enemy.name}
             </motion.span>
             <Swords className="w-3.5 h-3.5 text-red-500/80" />
           </div>

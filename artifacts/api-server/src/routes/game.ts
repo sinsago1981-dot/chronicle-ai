@@ -35,7 +35,7 @@ type Skill = {
   statRequirement?: { stat: keyof Omit<Stats, "hp" | "maxHp">; min: number };
 };
 
-type Enemy = { name: string; hp: number; maxHp: number; attack: number; defense: number };
+type Enemy = { name: string; nameKo?: string; hp: number; maxHp: number; attack: number; defense: number };
 
 type ItemType   = "consumable" | "equipment" | "key_item";
 type ItemRarity = "common" | "uncommon" | "rare" | "legendary";
@@ -558,6 +558,8 @@ Ranges: hp 0-maxHp, others 1-10.
 ═══ ENEMY SYSTEM ═══
 Combat is visceral and specific. Never generic enemies:
 - Names must evoke the world: "Cinder-Jaw Enforcer of the Sable Guild", "Vrethian Null-Knight", "The Warden Who Forgot Her Name"
+- Always include BOTH "name" (English/romanized) AND "nameKo" (Korean translation) in every enemy object.
+- Example: "name": "Cinder-Jaw Enforcer", "nameKo": "불씨턱 집행관"
 - Enemy stats scale with threat: hp 25-100, attack 4-12, defense 1-8
 - HP changes per roll:
   CRITICAL SUCCESS: enemy -22 to -35 | SUCCESS: enemy -10 to -20
@@ -926,6 +928,8 @@ NPC들이 모든 것을 알 필요는 없음 — 하지만 그들이 속한 공�
 ═══ 적 시스템 ═══
 전투는 생생하고 구체적입니다. 일반적인 적 금지:
 - 이름은 세계를 반영해야 합니다: "흑요석 조합의 불씨턱 집행관", "브레시안 무효기사", "자신의 이름을 잊어버린 간수"
+- 적 오브젝트에는 반드시 "name" (영어/로마자) AND "nameKo" (한국어) 두 필드를 모두 포함하세요.
+- 예시: "name": "Cinder-Jaw Enforcer", "nameKo": "불씨턱 집행관"
 - 적 스탯: hp 25~100, attack 4~12, defense 1~8
 - 주사위 결과별 HP 변화:
   대성공: 적 -22~-35 | 성공: 적 -10~-20
@@ -1544,6 +1548,7 @@ router.post("/:id/choice", async (req, res) => {
     const newEnemy: Enemy | null = data.inCombat && data.enemy
       ? {
           name:    data.enemy.name    ?? currentEnemy?.name    ?? "Unknown",
+          nameKo:  data.enemy.nameKo  ?? currentEnemy?.nameKo,
           hp:      serverTrackedHp,
           maxHp:   data.enemy.maxHp   ?? currentEnemy?.maxHp   ?? serverTrackedHp,
           attack:  data.enemy.attack  ?? currentEnemy?.attack  ?? 5,

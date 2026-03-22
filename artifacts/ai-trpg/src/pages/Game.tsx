@@ -19,6 +19,21 @@ import { ItemsPanel } from "@/components/ItemsPanel";
 import { CombatPanel } from "@/components/CombatPanel";
 import { LoadingScreen } from "@/components/LoadingScreen";
 
+// ─── Constants ────────────────────────────────────────────────────────────────
+
+const CLASS_EN_TO_KO: Record<string, string> = {
+  Warrior:     "전사",
+  Rogue:       "도적",
+  Mage:        "마법사",
+  Paladin:     "성기사",
+  Ranger:      "레인저",
+  Necromancer: "사령술사",
+  Bard:        "음유시인",
+  Druid:       "드루이드",
+  Ironclad:    "철갑전사",
+  Hexblade:    "저주검사",
+};
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type StoryBeat = {
@@ -654,7 +669,7 @@ export default function Game() {
                   {playerMeta.name || "—"}
                 </span>
                 <span className="text-muted-foreground/50">·</span>
-                <span>{playerMeta.characterClass}</span>
+                <span>{lang === "ko" ? (CLASS_EN_TO_KO[playerMeta.characterClass] ?? playerMeta.characterClass) : playerMeta.characterClass}</span>
               </div>
             )}
             <div className="text-[10px] text-muted-foreground/50">
