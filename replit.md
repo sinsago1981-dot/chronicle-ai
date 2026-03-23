@@ -95,3 +95,45 @@ Generated React Query hooks and fetch client from the OpenAPI spec (e.g. `useHea
 ### `scripts` (`@workspace/scripts`)
 
 Utility scripts package. Each script is a `.ts` file in `src/` with a corresponding npm script in `package.json`. Run scripts via `pnpm --filter @workspace/scripts run <script>`. Scripts can import any workspace package (e.g., `@workspace/db`) by adding it as a dependency in `scripts/package.json`.
+
+## Local Development (VS Code)
+
+### 1. Prerequisites
+- Node.js 22+ (24 recommended)
+- pnpm (`npm install -g pnpm`)
+- PostgreSQL running locally (or a remote connection string)
+
+### 2. Environment variables
+```bash
+cp .env.example .env
+# Edit .env and fill in DATABASE_URL and OPENAI_API_KEY
+```
+
+### 3. Install dependencies
+```bash
+pnpm install
+```
+
+### 4. Set up the database
+```bash
+pnpm --filter @workspace/db run push
+```
+
+### 5. Start both servers
+```bash
+pnpm dev
+# API server → http://localhost:10000
+# Frontend   → http://localhost:3000  (proxies /api → API server automatically)
+```
+
+Or start them separately in two terminals:
+```bash
+pnpm --filter @workspace/api-server run dev   # terminal 1
+pnpm --filter @workspace/ai-trpg run dev      # terminal 2
+```
+
+### Environment variable loading
+- **API server** — reads `../../.env` (project root) via Node's `--env-file-if-exists` flag
+- **drizzle migrations** — reads `../../.env` (project root) via dotenv in `drizzle.config.ts`
+- **Frontend (Vite)** — no secrets needed; API calls are proxied to `localhost:API_PORT` (default 10000)
+- **Replit** — env vars are set through Replit's secrets panel; `.env` file is ignored
