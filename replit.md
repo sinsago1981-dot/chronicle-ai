@@ -98,49 +98,61 @@ Utility scripts package. Each script is a `.ts` file in `src/` with a correspond
 
 ## Windows / Cross-Platform Notes
 
-- **Native binaries** (lightningcss, @tailwindcss/oxide, esbuild, rollup) are handled automatically by pnpm: it installs only the binary that matches the current OS/arch. No manual overrides needed.
-- **Replit-specific Vite plugins** (`@replit/vite-plugin-*`) have been removed from all artifacts. The plugins were previously guarded by `REPL_ID` but are now gone entirely.
-- **PowerShell script**: `setup.ps1` at the project root automates first-time setup on Windows. Run it in PowerShell after cloning.
-- **preinstall script** uses Node.js (`node -e "..."`) instead of `sh -c` for cross-platform compatibility.
+- **Native binaries** (lightningcss, @tailwindcss/oxide, esbuild, rollup) — pnpm installs only the binary matching the current OS/arch automatically. No manual overrides needed.
+- **Replit-specific Vite plugins** (`@replit/vite-plugin-*`) removed from all artifacts.
+- **`export` → `cross-env`** — `cross-env` is used in api-server dev script for Windows CMD/PowerShell compatibility.
+- **`--env-file-if-exists` → `load-env.mjs`** — `artifacts/api-server/load-env.mjs` is a thin wrapper that loads `.env` via `dotenv` before starting the server. Works with any Node 16+.
+- **preinstall** uses `node -e "..."` instead of `sh -c` for cross-platform compatibility.
 
-## Local Development (VS Code)
+## Local Development (VS Code / Windows)
 
-### 1. Prerequisites
-- Node.js 22+ (24 recommended)
-- pnpm (`npm install -g pnpm`)
-- PostgreSQL running locally (or a remote connection string)
+### 가장 쉬운 방법 (Windows)
 
-### 2. Environment variables
-```bash
-cp .env.example .env
-# Edit .env and fill in DATABASE_URL and OPENAI_API_KEY
+**방법 A**: `start.bat` 파일을 더블클릭
+- node_modules가 없으면 자동 설치
+- .env가 없으면 자동 복사 후 메모장으로 오픈
+- 첫 실행 시 DB 마이그레이션 자동 실행
+- 완료 후 자동으로 두 서버 시작
+
+**방법 B**: PowerShell 스크립트
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser RemoteSigned  # 최초 1회
+.\setup.ps1
 ```
 
-### 3. Install dependencies
+### 수동 설정
+
+**1. 필수 조건**
+- Node.js 20+ (https://nodejs.org → LTS 버전)
+- pnpm (`npm install -g pnpm`)
+- PostgreSQL DB — **로컬 설치 불필요**: [Neon.tech](https://neon.tech) 무료 클라우드 DB 사용 가능
+
+**2. 환경변수 설정**
+```bash
+cp .env.example .env
+# .env 파일에서 DATABASE_URL, OPENAI_API_KEY 입력
+```
+
+**3. 패키지 설치**
 ```bash
 pnpm install
 ```
 
-### 4. Set up the database
+**4. DB 테이블 생성 (첫 실행 시 한 번만)**
 ```bash
 pnpm --filter @workspace/db run push
 ```
 
-### 5. Start both servers
+**5. 개발 서버 실행**
 ```bash
-pnpm dev
-# API server → http://localhost:10000
-# Frontend   → http://localhost:3000  (proxies /api → API server automatically)
+pnpm dev          # API(10000포트) + 웹(3000포트) 동시 실행
+pnpm dev:api      # API 서버만 (터미널 1)
+pnpm dev:web      # 웹 서버만 (터미널 2)
 ```
+브라우저에서 http://localhost:3000 접속
 
-Or start them separately in two terminals:
-```bash
-pnpm --filter @workspace/api-server run dev   # terminal 1
-pnpm --filter @workspace/ai-trpg run dev      # terminal 2
-```
-
-### Environment variable loading
-- **API server** — reads `../../.env` (project root) via Node's `--env-file-if-exists` flag
-- **drizzle migrations** — reads `../../.env` (project root) via dotenv in `drizzle.config.ts`
-- **Frontend (Vite)** — no secrets needed; API calls are proxied to `localhost:API_PORT` (default 10000)
-- **Replit** — env vars are set through Replit's secrets panel; `.env` file is ignored
+### 환경변수 로딩 방식
+- **API 서버** — `artifacts/api-server/load-env.mjs`가 `dotenv`로 루트 `.env`를 읽음 (Node 16+ 호환)
+- **drizzle 마이그레이션** — `lib/db/drizzle.config.ts`에서 `dotenv`로 루트 `.env`를 읽음
+- **프론트엔드 (Vite)** — 시크릿 불필요; `/api` 요청은 Vite 프록시로 API 서버에 전달
+- **Replit** — 환경변수가 전역으로 설정됨; `.env` 파일 없어도 동작

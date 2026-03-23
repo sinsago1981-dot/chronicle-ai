@@ -16,7 +16,7 @@ Write-Host "============================================" -ForegroundColor Cyan
 Write-Host ""
 
 # ── 1. 사전 확인 ────────────────────────────────────────────────────────────
-Write-Host "[1/5] Node.js / pnpm 버전 확인..." -ForegroundColor Yellow
+Write-Host "[1/6] Node.js / pnpm 버전 확인..." -ForegroundColor Yellow
 
 try {
     $nodeVer = node --version 2>&1
@@ -38,7 +38,7 @@ try {
 
 # ── 2. .env 파일 확인 ────────────────────────────────────────────────────────
 Write-Host ""
-Write-Host "[2/5] 환경변수 파일 확인..." -ForegroundColor Yellow
+Write-Host "[2/6] 환경변수 파일 확인..." -ForegroundColor Yellow
 
 if (-not (Test-Path ".env")) {
     if (Test-Path ".env.example") {
@@ -59,7 +59,7 @@ if (-not (Test-Path ".env")) {
 
 # ── 3. node_modules 초기화 ──────────────────────────────────────────────────
 Write-Host ""
-Write-Host "[3/5] 기존 node_modules 삭제..." -ForegroundColor Yellow
+Write-Host "[3/6] 기존 node_modules 삭제..." -ForegroundColor Yellow
 Write-Host "  (ERR_PNPM_EPERM 오류 방지를 위해 관리자 권한으로 실행하세요)" -ForegroundColor Gray
 
 $nmPaths = @(
@@ -84,7 +84,7 @@ Write-Host "  완료." -ForegroundColor Green
 
 # ── 4. 의존성 설치 ──────────────────────────────────────────────────────────
 Write-Host ""
-Write-Host "[4/5] pnpm install 실행..." -ForegroundColor Yellow
+Write-Host "[4/6] pnpm install 실행..." -ForegroundColor Yellow
 Write-Host "  (첫 설치는 수 분이 걸릴 수 있습니다)" -ForegroundColor Gray
 Write-Host ""
 
@@ -102,7 +102,21 @@ if ($LASTEXITCODE -ne 0) {
 
 Write-Host "  설치 완료." -ForegroundColor Green
 
-# ── 5. 완료 안내 ────────────────────────────────────────────────────────────
+# ── 5. DB 마이그레이션 (첫 실행 시) ────────────────────────────────────────
+Write-Host ""
+Write-Host "[5/6] DB 테이블 생성 (처음 한 번만 실행)..." -ForegroundColor Yellow
+
+pnpm --filter @workspace/db run push
+
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "  [경고] DB 마이그레이션 실패." -ForegroundColor Red
+    Write-Host "  .env 파일의 DATABASE_URL 을 확인하세요." -ForegroundColor Yellow
+    Write-Host "  무료 DB: https://neon.tech" -ForegroundColor Yellow
+} else {
+    Write-Host "  DB 초기화 완료." -ForegroundColor Green
+}
+
+# ── 6. 완료 안내 ────────────────────────────────────────────────────────────
 Write-Host ""
 Write-Host "============================================" -ForegroundColor Cyan
 Write-Host "  설정 완료!" -ForegroundColor Cyan
