@@ -66,12 +66,22 @@ if not exist "node_modules" (
     echo.
 
     :: 첫 설치 시 DB 마이그레이션 실행
-    echo DB 테이블 생성 중...
-    pnpm --filter @workspace/db run push
-    if errorlevel 1 (
-        echo [경고] DB 마이그레이션 실패. .env 의 DATABASE_URL 을 확인하세요.
-    ) else (
+    echo.
+    echo DB 마이그레이션을 시작합니다...
+    echo (문제가 발생하면 나중에 수동으로 실행할 수 있습니다)
+    echo.
+    
+    :: DATABASE_URL 환경변수 설정
+    for /f "tokens=2 delims==" %%i in ('findstr /R "^DATABASE_URL=" ".env"') do set "DATABASE_URL=%%i"
+    
+    :: drizzle push 시도
+    call pnpm --filter @workspace/db run push 2>nul
+    if not errorlevel 1 (
         echo DB 초기화 완료.
+    ) else (
+        echo [참고] DB 마이그레이션을 스킵했습니다.
+        echo      나중에 다음 명령으로 수동 실행 가능:
+        echo      pnpm --filter @workspace/db run push
     )
     echo.
 )

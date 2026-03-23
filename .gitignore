@@ -47,6 +47,8 @@ Thumbs.db
 # Replit
 .cache/
 .local/
+artifacts/mockup-sandbox/
+.replit-artifact/
 
 # Local environment variables — never commit secrets
 .env
