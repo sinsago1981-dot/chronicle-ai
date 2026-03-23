@@ -96,6 +96,13 @@ Generated React Query hooks and fetch client from the OpenAPI spec (e.g. `useHea
 
 Utility scripts package. Each script is a `.ts` file in `src/` with a corresponding npm script in `package.json`. Run scripts via `pnpm --filter @workspace/scripts run <script>`. Scripts can import any workspace package (e.g., `@workspace/db`) by adding it as a dependency in `scripts/package.json`.
 
+## Windows / Cross-Platform Notes
+
+- **Native binaries** (lightningcss, @tailwindcss/oxide, esbuild, rollup) are handled automatically by pnpm: it installs only the binary that matches the current OS/arch. No manual overrides needed.
+- **Replit-specific Vite plugins** (`@replit/vite-plugin-*`) have been removed from all artifacts. The plugins were previously guarded by `REPL_ID` but are now gone entirely.
+- **PowerShell script**: `setup.ps1` at the project root automates first-time setup on Windows. Run it in PowerShell after cloning.
+- **preinstall script** uses Node.js (`node -e "..."`) instead of `sh -c` for cross-platform compatibility.
+
 ## Local Development (VS Code)
 
 ### 1. Prerequisites
